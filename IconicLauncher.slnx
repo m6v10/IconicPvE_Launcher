@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IconicLauncher.Core/IconicLauncher.Core.csproj" />
+    <Project Path="src/IconicLauncher/IconicLauncher.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IconicLauncher.Tests/IconicLauncher.Tests.csproj" />
+  </Folder>
+</Solution>

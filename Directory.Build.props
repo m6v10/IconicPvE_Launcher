@@ -1,0 +1,11 @@
+﻿<Project>
+  <PropertyGroup>
+    <Version>1.0.3</Version>
+    <Authors>M6</Authors>
+    <Company>M6</Company>
+    <Product>IconicPvE Launcher</Product>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

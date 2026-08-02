@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "generatedUtc": "2026-01-01T00:00:00Z",
+    "websiteUrl": "https://example.com",
+    "launcher": {
+        "latestVersion": "1.0.0",
+        "downloadUrl": "https://example.com/launcher/IconicPvE_Launcher-1.0.0.exe",
+        "sha256": "",
+        "changelog": "What changed in this version."
+    },
+    "discord": {
+        "inviteUrl": "https://discord.gg/example",
+        "applicationId": ""
+    },
+    "servers": [
+        {
+            "id": "eumain",
+            "name": "Example - EU Main",
+            "ip": "127.0.0.1",
+            "gamePort": 2302,
+            "queryPort": 2303,
+            "modsFromQuery": false,
+            "restartIntervalHours": 3,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": [
+                { "workshopId": "1559212036", "name": "CF" },
+                { "workshopId": "2545327648", "name": "Dabs Framework" }
+            ]
+        },
+        {
+            "id": "eutest",
+            "name": "Example - live mod list from the server",
+            "ip": "127.0.0.1",
+            "gamePort": 2702,
+            "queryPort": 2703,
+            "modsFromQuery": true,
+            "restartIntervalHours": 0,
+            "mods": []
+        }
+    ],
+    "news": [
+        {
+            "id": "welcome",
+            "date": "01.01.2026",
+            "title": "Example announcement",
+            "body": "Shown on the launcher's Home tab. Newest entry goes first.",
+            "url": null
+        }
+    ]
+}

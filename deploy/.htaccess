@@ -1,0 +1,52 @@
+# Iconic PvE launcher distribution folder
+# Upload this file to /public_html/wp-content/uploads/launcher/.htaccess
+#
+# wp-content/uploads is hardened on most WordPress installs - hosts and security
+# plugins (Wordfence, iThemes, Solid) commonly add rules that deny anything which
+# is not an image. That would 403 both launcher-config.json and the installer,
+# and the launcher swallows a failed config fetch into a silent fallback, so the
+# symptom would just be "nobody ever gets updates". These rules re-permit this
+# one folder without loosening the rest of uploads.
+
+# Correct types. Some hosts serve unknown extensions as text/plain, which makes
+# browsers render the exe instead of downloading it.
+<IfModule mod_mime.c>
+    AddType application/json .json
+    AddType application/octet-stream .exe
+</IfModule>
+
+<IfModule mod_headers.c>
+    # The config is polled every 5 minutes and must never be served stale.
+    # The launcher already cache-busts with ?t=<unix>; this closes the server side.
+    <FilesMatch "\.json$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    </FilesMatch>
+    # Installers are versioned in the filename, so they can cache hard.
+    # This is what keeps a rollout from eating your transfer allowance twice.
+    <FilesMatch "\.exe$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+</IfModule>
+
+# Re-allow direct access to this folder, overriding a restrictive parent rule.
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>
+
+# Uploads must never execute code - keep that true here too.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|phtml|php[0-9]|pl|py|cgi|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

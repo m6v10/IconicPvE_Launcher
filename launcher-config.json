@@ -1,0 +1,868 @@
+{
+    "schemaVersion": 1,
+    "generatedUtc": "2026-08-02T14:12:15Z",
+    "websiteUrl": "https://iconic-pve.com",
+    "launcher": {
+        "latestVersion": "1.0.3",
+        "downloadUrl": "https://iconic-pve.com/wp-content/uploads/launcher/IconicPvE_Launcher-1.0.3.exe",
+        "sha256": "573561A9C571E9C4F838B91F4A8E0B16DA254CFA732A4E277748F64E1AABD159",
+        "changelog": "News now updates while the launcher is open, without a restart."
+    },
+    "discord": {
+        "inviteUrl": "https://discord.gg/iconicpve",
+        "applicationId": ""
+    },
+    "servers": [
+        {
+            "id": "eumain",
+            "name": "Iconic PvE - EU Main",
+            "ip": "193.25.252.68",
+            "gamePort": 2302,
+            "queryPort": 2303,
+            "restartIntervalHours": 3,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": [
+                {
+                    "workshopId": "3682800023",
+                    "name": "Murano's CarLock System"
+                },
+                {
+                    "workshopId": "3681415744",
+                    "name": "RaG_Expansion_Compatibility"
+                },
+                {
+                    "workshopId": "3707015798",
+                    "name": "Car Camera Controls by DelaDuck"
+                },
+                {
+                    "workshopId": "3484152258",
+                    "name": "BS Field of View - FOV"
+                },
+                {
+                    "workshopId": "2545327648",
+                    "name": "Dabs Framework"
+                },
+                {
+                    "workshopId": "1559212036",
+                    "name": "CF"
+                },
+                {
+                    "workshopId": "2291785308",
+                    "name": "DayZ-Expansion-Core"
+                },
+                {
+                    "workshopId": "3491661516",
+                    "name": "DudeWheresMyCar"
+                },
+                {
+                    "workshopId": "3605225106",
+                    "name": "Iconic Server Pack Equipment"
+                },
+                {
+                    "workshopId": "3434614117",
+                    "name": "Iconic Server Pack Essentials"
+                },
+                {
+                    "workshopId": "3047438506",
+                    "name": "Iconic Server Pack Systems"
+                },
+                {
+                    "workshopId": "3047413032",
+                    "name": "Iconic Server Pack Vehicles"
+                },
+                {
+                    "workshopId": "3077736647",
+                    "name": "Iconic Server Pack Core"
+                },
+                {
+                    "workshopId": "3309721541",
+                    "name": "Iconic Server Pack Entities"
+                },
+                {
+                    "workshopId": "3605259764",
+                    "name": "Iconic Server Pack Customs"
+                },
+                {
+                    "workshopId": "2792982069",
+                    "name": "DayZ-Expansion-AI"
+                },
+                {
+                    "workshopId": "2276010135",
+                    "name": "DayZ Editor Loader"
+                },
+                {
+                    "workshopId": "2572328470",
+                    "name": "DayZ-Expansion-Market"
+                },
+                {
+                    "workshopId": "2847957663",
+                    "name": "PseudoGiant"
+                },
+                {
+                    "workshopId": "1565871491",
+                    "name": "BuilderItems"
+                },
+                {
+                    "workshopId": "2814571904",
+                    "name": "AutoRun"
+                },
+                {
+                    "workshopId": "3425994533",
+                    "name": "VehicleRecovery"
+                },
+                {
+                    "workshopId": "3387855369",
+                    "name": "4KBOSSKVehiclePackage"
+                },
+                {
+                    "workshopId": "3369106986",
+                    "name": "RestartWarner"
+                },
+                {
+                    "workshopId": "2745352757",
+                    "name": "LoftDModGR Clothes Pack"
+                },
+                {
+                    "workshopId": "2932515312",
+                    "name": "Item Rarity"
+                },
+                {
+                    "workshopId": "3354931239",
+                    "name": "Alevaric's Clothing Overhaul"
+                },
+                {
+                    "workshopId": "2981367410",
+                    "name": "LightObjects"
+                },
+                {
+                    "workshopId": "2376962187",
+                    "name": "Fear the wall in dayz"
+                },
+                {
+                    "workshopId": "3167286994",
+                    "name": "AutolockVehicles"
+                },
+                {
+                    "workshopId": "3556131153",
+                    "name": "RaG_Core"
+                },
+                {
+                    "workshopId": "3157695626",
+                    "name": "RaG_BaseBuilding"
+                },
+                {
+                    "workshopId": "2741271183",
+                    "name": "AmmunitionExpansion"
+                },
+                {
+                    "workshopId": "2851058261",
+                    "name": "CJ187-PokemonCards"
+                },
+                {
+                    "workshopId": "2878980498",
+                    "name": "RaG_BaseItems"
+                },
+                {
+                    "workshopId": "3117613872",
+                    "name": "RaG_Hunting_Cabin"
+                },
+                {
+                    "workshopId": "2936585965",
+                    "name": "SearchInventory"
+                },
+                {
+                    "workshopId": "1646187754",
+                    "name": "Code Lock"
+                },
+                {
+                    "workshopId": "3002379892",
+                    "name": "MuchPVE"
+                },
+                {
+                    "workshopId": "2393499239",
+                    "name": "TerrainIslands"
+                },
+                {
+                    "workshopId": "2692979668",
+                    "name": "RedFalcon Flight System Heliz"
+                },
+                {
+                    "workshopId": "2931436407",
+                    "name": "Drippy Sneakers"
+                },
+                {
+                    "workshopId": "2024889593",
+                    "name": "COCAs_NoVehicleDamageMOD"
+                },
+                {
+                    "workshopId": "1772776141",
+                    "name": "PvZmoD_Spawn_System"
+                },
+                {
+                    "workshopId": "2051775667",
+                    "name": "PvZmoD_CustomisableZombies"
+                },
+                {
+                    "workshopId": "2931560672",
+                    "name": "Forward Operator Gear"
+                },
+                {
+                    "workshopId": "3413364741",
+                    "name": "AJs Creatures V2"
+                },
+                {
+                    "workshopId": "2663169692",
+                    "name": "MMG - Mightys Military Gear"
+                }
+            ]
+        },
+        {
+            "id": "eulite",
+            "name": "Iconic PvE - EU Lite",
+            "ip": "193.25.252.68",
+            "gamePort": 2402,
+            "queryPort": 2403,
+            "restartIntervalHours": 3,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": [
+                {
+                    "workshopId": "3682800023",
+                    "name": "Murano's CarLock System"
+                },
+                {
+                    "workshopId": "3681415744",
+                    "name": "RaG_Expansion_Compatibility"
+                },
+                {
+                    "workshopId": "3707015798",
+                    "name": "Car Camera Controls by DelaDuck"
+                },
+                {
+                    "workshopId": "3484152258",
+                    "name": "BS Field of View - FOV"
+                },
+                {
+                    "workshopId": "2545327648",
+                    "name": "Dabs Framework"
+                },
+                {
+                    "workshopId": "1559212036",
+                    "name": "CF"
+                },
+                {
+                    "workshopId": "2291785308",
+                    "name": "DayZ-Expansion-Core"
+                },
+                {
+                    "workshopId": "3491661516",
+                    "name": "DudeWheresMyCar"
+                },
+                {
+                    "workshopId": "3605225106",
+                    "name": "Iconic Server Pack Equipment"
+                },
+                {
+                    "workshopId": "3434614117",
+                    "name": "Iconic Server Pack Essentials"
+                },
+                {
+                    "workshopId": "3047438506",
+                    "name": "Iconic Server Pack Systems"
+                },
+                {
+                    "workshopId": "3047413032",
+                    "name": "Iconic Server Pack Vehicles"
+                },
+                {
+                    "workshopId": "3077736647",
+                    "name": "Iconic Server Pack Core"
+                },
+                {
+                    "workshopId": "3309721541",
+                    "name": "Iconic Server Pack Entities"
+                },
+                {
+                    "workshopId": "3605259764",
+                    "name": "Iconic Server Pack Customs"
+                },
+                {
+                    "workshopId": "2792982069",
+                    "name": "DayZ-Expansion-AI"
+                },
+                {
+                    "workshopId": "2276010135",
+                    "name": "DayZ Editor Loader"
+                },
+                {
+                    "workshopId": "2572328470",
+                    "name": "DayZ-Expansion-Market"
+                },
+                {
+                    "workshopId": "2847957663",
+                    "name": "PseudoGiant"
+                },
+                {
+                    "workshopId": "1565871491",
+                    "name": "BuilderItems"
+                },
+                {
+                    "workshopId": "2814571904",
+                    "name": "AutoRun"
+                },
+                {
+                    "workshopId": "3425994533",
+                    "name": "VehicleRecovery"
+                },
+                {
+                    "workshopId": "3387855369",
+                    "name": "4KBOSSKVehiclePackage"
+                },
+                {
+                    "workshopId": "3369106986",
+                    "name": "RestartWarner"
+                },
+                {
+                    "workshopId": "2745352757",
+                    "name": "LoftDModGR Clothes Pack"
+                },
+                {
+                    "workshopId": "2932515312",
+                    "name": "Item Rarity"
+                },
+                {
+                    "workshopId": "3354931239",
+                    "name": "Alevaric's Clothing Overhaul"
+                },
+                {
+                    "workshopId": "2981367410",
+                    "name": "LightObjects"
+                },
+                {
+                    "workshopId": "2376962187",
+                    "name": "Fear the wall in dayz"
+                },
+                {
+                    "workshopId": "3167286994",
+                    "name": "AutolockVehicles"
+                },
+                {
+                    "workshopId": "3556131153",
+                    "name": "RaG_Core"
+                },
+                {
+                    "workshopId": "3157695626",
+                    "name": "RaG_BaseBuilding"
+                },
+                {
+                    "workshopId": "2741271183",
+                    "name": "AmmunitionExpansion"
+                },
+                {
+                    "workshopId": "2851058261",
+                    "name": "CJ187-PokemonCards"
+                },
+                {
+                    "workshopId": "2878980498",
+                    "name": "RaG_BaseItems"
+                },
+                {
+                    "workshopId": "3117613872",
+                    "name": "RaG_Hunting_Cabin"
+                },
+                {
+                    "workshopId": "2936585965",
+                    "name": "SearchInventory"
+                },
+                {
+                    "workshopId": "1646187754",
+                    "name": "Code Lock"
+                },
+                {
+                    "workshopId": "3002379892",
+                    "name": "MuchPVE"
+                },
+                {
+                    "workshopId": "2393499239",
+                    "name": "TerrainIslands"
+                },
+                {
+                    "workshopId": "2692979668",
+                    "name": "RedFalcon Flight System Heliz"
+                },
+                {
+                    "workshopId": "2931436407",
+                    "name": "Drippy Sneakers"
+                },
+                {
+                    "workshopId": "2024889593",
+                    "name": "COCAs_NoVehicleDamageMOD"
+                },
+                {
+                    "workshopId": "1772776141",
+                    "name": "PvZmoD_Spawn_System"
+                },
+                {
+                    "workshopId": "2051775667",
+                    "name": "PvZmoD_CustomisableZombies"
+                },
+                {
+                    "workshopId": "2931560672",
+                    "name": "Forward Operator Gear"
+                },
+                {
+                    "workshopId": "3413364741",
+                    "name": "AJs Creatures V2"
+                },
+                {
+                    "workshopId": "2663169692",
+                    "name": "MMG - Mightys Military Gear"
+                }
+            ]
+        },
+        {
+            "id": "usmain",
+            "name": "Iconic PvE - US Main",
+            "ip": "172.111.51.200",
+            "gamePort": 2302,
+            "queryPort": 2303,
+            "restartIntervalHours": 0,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": [
+                {
+                    "workshopId": "3682800023",
+                    "name": "Murano's CarLock System"
+                },
+                {
+                    "workshopId": "3681415744",
+                    "name": "RaG_Expansion_Compatibility"
+                },
+                {
+                    "workshopId": "3707015798",
+                    "name": "Car Camera Controls by DelaDuck"
+                },
+                {
+                    "workshopId": "3484152258",
+                    "name": "BS Field of View - FOV"
+                },
+                {
+                    "workshopId": "3491661516",
+                    "name": "DudeWheresMyCar"
+                },
+                {
+                    "workshopId": "3605225106",
+                    "name": "Iconic Server Pack Equipment"
+                },
+                {
+                    "workshopId": "3434614117",
+                    "name": "Iconic Server Pack Essentials"
+                },
+                {
+                    "workshopId": "3047438506",
+                    "name": "Iconic Server Pack Systems"
+                },
+                {
+                    "workshopId": "3047413032",
+                    "name": "Iconic Server Pack Vehicles"
+                },
+                {
+                    "workshopId": "3077736647",
+                    "name": "Iconic Server Pack Core"
+                },
+                {
+                    "workshopId": "3309721541",
+                    "name": "Iconic Server Pack Entities"
+                },
+                {
+                    "workshopId": "3605259764",
+                    "name": "Iconic Server Pack Customs"
+                },
+                {
+                    "workshopId": "2792982069",
+                    "name": "DayZ-Expansion-AI"
+                },
+                {
+                    "workshopId": "2276010135",
+                    "name": "DayZ Editor Loader"
+                },
+                {
+                    "workshopId": "2572328470",
+                    "name": "DayZ-Expansion-Market"
+                },
+                {
+                    "workshopId": "2847957663",
+                    "name": "PseudoGiant"
+                },
+                {
+                    "workshopId": "1565871491",
+                    "name": "BuilderItems"
+                },
+                {
+                    "workshopId": "2291785308",
+                    "name": "DayZ-Expansion-Core"
+                },
+                {
+                    "workshopId": "2814571904",
+                    "name": "AutoRun"
+                },
+                {
+                    "workshopId": "3425994533",
+                    "name": "VehicleRecovery"
+                },
+                {
+                    "workshopId": "3387855369",
+                    "name": "4KBOSSKVehiclePackage"
+                },
+                {
+                    "workshopId": "3369106986",
+                    "name": "RestartWarner"
+                },
+                {
+                    "workshopId": "2745352757",
+                    "name": "LoftDModGR Clothes Pack"
+                },
+                {
+                    "workshopId": "2932515312",
+                    "name": "Item Rarity"
+                },
+                {
+                    "workshopId": "3354931239",
+                    "name": "Alevaric's Clothing Overhaul"
+                },
+                {
+                    "workshopId": "2981367410",
+                    "name": "LightObjects"
+                },
+                {
+                    "workshopId": "2376962187",
+                    "name": "Fear the wall in dayz"
+                },
+                {
+                    "workshopId": "3167286994",
+                    "name": "AutolockVehicles"
+                },
+                {
+                    "workshopId": "3157695626",
+                    "name": "RaG_BaseBuilding"
+                },
+                {
+                    "workshopId": "2741271183",
+                    "name": "AmmunitionExpansion"
+                },
+                {
+                    "workshopId": "2851058261",
+                    "name": "CJ187-PokemonCards"
+                },
+                {
+                    "workshopId": "2878980498",
+                    "name": "RaG_BaseItems"
+                },
+                {
+                    "workshopId": "3117613872",
+                    "name": "RaG_Hunting_Cabin"
+                },
+                {
+                    "workshopId": "2936585965",
+                    "name": "SearchInventory"
+                },
+                {
+                    "workshopId": "1646187754",
+                    "name": "CodeLock"
+                },
+                {
+                    "workshopId": "3002379892",
+                    "name": "MuchPVE"
+                },
+                {
+                    "workshopId": "2393499239",
+                    "name": "Terrain Islands"
+                },
+                {
+                    "workshopId": "2692979668",
+                    "name": "RedFalcon Flight System Heliz"
+                },
+                {
+                    "workshopId": "2931436407",
+                    "name": "Drippy Sneakers"
+                },
+                {
+                    "workshopId": "2024889593",
+                    "name": "COCAs_NoVehicleDamageMOD"
+                },
+                {
+                    "workshopId": "1772776141",
+                    "name": "PvZmoD Spawn System"
+                },
+                {
+                    "workshopId": "2051775667",
+                    "name": "PvZmoD Customisable Zombies"
+                },
+                {
+                    "workshopId": "2931560672",
+                    "name": "Forward Operator Gear"
+                },
+                {
+                    "workshopId": "3413364741",
+                    "name": "AJs Creatures V2"
+                },
+                {
+                    "workshopId": "2663169692",
+                    "name": "MMG - Mightys Military Gear"
+                },
+                {
+                    "workshopId": "3556131153",
+                    "name": "RaG_Core"
+                },
+                {
+                    "workshopId": "2545327648",
+                    "name": "Dabs Framework"
+                },
+                {
+                    "workshopId": "1559212036",
+                    "name": "Community Framework"
+                }
+            ]
+        },
+        {
+            "id": "uslite",
+            "name": "Iconic PvE - US Lite",
+            "ip": "172.111.51.200",
+            "gamePort": 2402,
+            "queryPort": 2403,
+            "restartIntervalHours": 0,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": [
+                {
+                    "workshopId": "3682800023",
+                    "name": "Murano's CarLock System"
+                },
+                {
+                    "workshopId": "3681415744",
+                    "name": "RaG_Expansion_Compatibility"
+                },
+                {
+                    "workshopId": "3707015798",
+                    "name": "Car Camera Controls by DelaDuck"
+                },
+                {
+                    "workshopId": "3484152258",
+                    "name": "BS Field of View - FOV"
+                },
+                {
+                    "workshopId": "3491661516",
+                    "name": "DudeWheresMyCar"
+                },
+                {
+                    "workshopId": "3605225106",
+                    "name": "Iconic Server Pack Equipment"
+                },
+                {
+                    "workshopId": "3434614117",
+                    "name": "Iconic Server Pack Essentials"
+                },
+                {
+                    "workshopId": "3047438506",
+                    "name": "Iconic Server Pack Systems"
+                },
+                {
+                    "workshopId": "3047413032",
+                    "name": "Iconic Server Pack Vehicles"
+                },
+                {
+                    "workshopId": "3077736647",
+                    "name": "Iconic Server Pack Core"
+                },
+                {
+                    "workshopId": "3309721541",
+                    "name": "Iconic Server Pack Entities"
+                },
+                {
+                    "workshopId": "3605259764",
+                    "name": "Iconic Server Pack Customs"
+                },
+                {
+                    "workshopId": "2792982069",
+                    "name": "DayZ-Expansion-AI"
+                },
+                {
+                    "workshopId": "2276010135",
+                    "name": "DayZ Editor Loader"
+                },
+                {
+                    "workshopId": "2572328470",
+                    "name": "DayZ-Expansion-Market"
+                },
+                {
+                    "workshopId": "2847957663",
+                    "name": "PseudoGiant"
+                },
+                {
+                    "workshopId": "1565871491",
+                    "name": "BuilderItems"
+                },
+                {
+                    "workshopId": "2291785308",
+                    "name": "DayZ-Expansion-Core"
+                },
+                {
+                    "workshopId": "2814571904",
+                    "name": "AutoRun"
+                },
+                {
+                    "workshopId": "3425994533",
+                    "name": "VehicleRecovery"
+                },
+                {
+                    "workshopId": "3387855369",
+                    "name": "4KBOSSKVehiclePackage"
+                },
+                {
+                    "workshopId": "3369106986",
+                    "name": "RestartWarner"
+                },
+                {
+                    "workshopId": "2745352757",
+                    "name": "LoftDModGR Clothes Pack"
+                },
+                {
+                    "workshopId": "2932515312",
+                    "name": "Item Rarity"
+                },
+                {
+                    "workshopId": "3354931239",
+                    "name": "Alevaric's Clothing Overhaul"
+                },
+                {
+                    "workshopId": "2981367410",
+                    "name": "LightObjects"
+                },
+                {
+                    "workshopId": "2376962187",
+                    "name": "Fear the wall in dayz"
+                },
+                {
+                    "workshopId": "3167286994",
+                    "name": "AutolockVehicles"
+                },
+                {
+                    "workshopId": "3157695626",
+                    "name": "RaG_BaseBuilding"
+                },
+                {
+                    "workshopId": "2741271183",
+                    "name": "AmmunitionExpansion"
+                },
+                {
+                    "workshopId": "2851058261",
+                    "name": "CJ187-PokemonCards"
+                },
+                {
+                    "workshopId": "2878980498",
+                    "name": "RaG_BaseItems"
+                },
+                {
+                    "workshopId": "3117613872",
+                    "name": "RaG_Hunting_Cabin"
+                },
+                {
+                    "workshopId": "2936585965",
+                    "name": "SearchInventory"
+                },
+                {
+                    "workshopId": "1646187754",
+                    "name": "CodeLock"
+                },
+                {
+                    "workshopId": "3002379892",
+                    "name": "MuchPVE"
+                },
+                {
+                    "workshopId": "2393499239",
+                    "name": "Terrain Islands"
+                },
+                {
+                    "workshopId": "2692979668",
+                    "name": "RedFalcon Flight System Heliz"
+                },
+                {
+                    "workshopId": "2931436407",
+                    "name": "Drippy Sneakers"
+                },
+                {
+                    "workshopId": "2024889593",
+                    "name": "COCAs_NoVehicleDamageMOD"
+                },
+                {
+                    "workshopId": "1772776141",
+                    "name": "PvZmoD Spawn System"
+                },
+                {
+                    "workshopId": "2051775667",
+                    "name": "PvZmoD Customisable Zombies"
+                },
+                {
+                    "workshopId": "2931560672",
+                    "name": "Forward Operator Gear"
+                },
+                {
+                    "workshopId": "3413364741",
+                    "name": "AJs Creatures V2"
+                },
+                {
+                    "workshopId": "2663169692",
+                    "name": "MMG - Mightys Military Gear"
+                },
+                {
+                    "workshopId": "3556131153",
+                    "name": "RaG_Core"
+                },
+                {
+                    "workshopId": "2545327648",
+                    "name": "Dabs Framework"
+                },
+                {
+                    "workshopId": "1559212036",
+                    "name": "Community Framework"
+                }
+            ]
+        },
+        {
+            "id": "eutest",
+            "name": "Iconic PvE - Test Server",
+            "ip": "193.25.252.68",
+            "gamePort": 2702,
+            "queryPort": 2703,
+            "modsFromQuery": true,
+            "restartIntervalHours": 3,
+            "restartAnchorHour": 1,
+            "restartTimeZone": "Europe/Zurich",
+            "mods": []
+        }
+    ],
+    "news": [
+        {
+            "id": "v103",
+            "date": "02.08.2026",
+            "title": "Launcher v1.0.3",
+            "body": "News now refreshes on its own while the launcher is open, so announcements show up without restarting it.",
+            "url": null
+        },
+        {
+            "id": "v102",
+            "date": "02.08.2026",
+            "title": "Launcher v1.0.2",
+            "body": "The MODS tab now shows a badge with how many mods need attention, so you can see it without opening the tab. Long mod names scroll fully instead of staying cut off.",
+            "url": null
+        },
+        {
+            "id": "us-servers",
+            "date": "02.08.2026",
+            "title": "US servers added",
+            "body": "Iconic PvE US Main and US Lite are now in the launcher. Same 48 mods as EU, so if you are set up for EU you can join either one right away.",
+            "url": null
+        }
+    ]
+}

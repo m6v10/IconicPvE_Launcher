@@ -77,6 +77,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string syncCountdownText = $"Syncing server status and mods automatically in {SyncIntervalSeconds}s";
 
+    [ObservableProperty]
+    private object? dialog;
+
     public MainViewModel(
         ISettingsService settingsService,
         IRemoteConfigService configService,
@@ -255,17 +258,253 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         WebsiteUrl = string.IsNullOrWhiteSpace(config.WebsiteUrl) ? null : config.WebsiteUrl.Trim();
         Home.Servers.Clear();
         Home.News.Clear();
-        foreach (var server in config.Servers)
+        foreach (var entry in BuildServerList())
         {
-            Home.Servers.Add(new ServerCardViewModel(server, this));
+            if (!entry.IsVisible) continue;
+            Home.Servers.Add(new ServerCardViewModel(entry.Server, this, entry.IsCustom));
         }
         // "news": null in a hand-edited config deserializes to null, not an empty list.
-        foreach (var item in config.News ?? new List<NewsItem>())
+        var news = config.News ?? new List<NewsItem>();
+        MarkNewNews(news);
+        foreach (var item in news)
         {
             Home.News.Add(item);
         }
         Mods.SetServers(Home.Servers);
         Admin?.SetTemplate(config);
+    }
+
+    public void MoveServerCard(ServerCardViewModel card, int delta)
+    {
+        var index = Home.Servers.IndexOf(card);
+        var target = index + delta;
+        if (index < 0 || target < 0 || target >= Home.Servers.Count)
+        {
+            return;
+        }
+        Home.Servers.Move(index, target);
+        SettingsService.Settings.ServerOrder = Home.Servers.Select(c => c.Server.Id).ToList();
+        try
+        {
+            SettingsService.Save();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Persisting the server order failed");
+        }
+    }
+
+    internal IReadOnlyList<ServerListEntry> BuildServerList()
+    {
+        return ServerListBuilder.BuildAll(_config ?? new LauncherConfig(), SettingsService.Settings);
+    }
+
+    internal bool IsKnownServerId(string id)
+    {
+        return BuildServerList().Any(e => string.Equals(e.Server.Id, id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Adds a player-defined server. Returns null on success, otherwise the reason.
+    /// </summary>
+    internal string? AddCustomServer(ServerEntry server)
+    {
+        if (IsKnownServerId(server.Id))
+        {
+            return "That server is already in your list.";
+        }
+        var settings = SettingsService.Settings;
+        settings.CustomServers ??= new List<ServerEntry>();
+        settings.CustomServers.Add(server);
+        settings.ServerVisibility ??= new Dictionary<string, bool>();
+        settings.ServerVisibility[server.Id] = true;
+        SaveSettingsSafe("Saving the custom server failed");
+        AddCard(server, true);
+        return null;
+    }
+
+    /// <summary>
+    /// Shows or hides a server card. Returns null on success, otherwise the reason.
+    /// </summary>
+    internal string? SetServerVisible(string id, bool visible)
+    {
+        var entry = BuildServerList().FirstOrDefault(e => string.Equals(e.Server.Id, id, StringComparison.OrdinalIgnoreCase));
+        if (entry is null)
+        {
+            return "That server is no longer in the list.";
+        }
+        if (!visible)
+        {
+            var blocked = BlockReason(id);
+            if (blocked != null)
+            {
+                return blocked;
+            }
+        }
+        var settings = SettingsService.Settings;
+        settings.ServerVisibility ??= new Dictionary<string, bool>();
+        settings.ServerVisibility[id] = visible;
+        SaveSettingsSafe("Saving the server visibility failed");
+        if (visible)
+        {
+            AddCard(entry.Server, entry.IsCustom);
+        }
+        else
+        {
+            RemoveCard(id);
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Deletes a player-defined server for good. Returns null on success, otherwise the reason.
+    /// </summary>
+    internal string? DeleteCustomServer(string id)
+    {
+        var settings = SettingsService.Settings;
+        var custom = settings.CustomServers?.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase));
+        if (custom is null)
+        {
+            return "Only servers you added yourself can be deleted.";
+        }
+        var blocked = BlockReason(id);
+        if (blocked != null)
+        {
+            return blocked;
+        }
+        settings.CustomServers!.Remove(custom);
+        settings.ServerVisibility?.Remove(id);
+        settings.ServerOrder?.RemoveAll(s => string.Equals(s, id, StringComparison.OrdinalIgnoreCase));
+        SaveSettingsSafe("Deleting the custom server failed");
+        RemoveCard(id);
+        return null;
+    }
+
+    /// <summary>
+    /// Drops every visibility override, so the list falls back to what the config ships.
+    /// </summary>
+    internal void RestoreDefaultServerVisibility()
+    {
+        var settings = SettingsService.Settings;
+        settings.ServerVisibility = new Dictionary<string, bool>();
+        SaveSettingsSafe("Restoring the default server list failed");
+        foreach (var entry in BuildServerList())
+        {
+            if (entry.IsVisible)
+            {
+                AddCard(entry.Server, entry.IsCustom);
+            }
+            else
+            {
+                RemoveCard(entry.Server.Id);
+            }
+        }
+    }
+
+    private string? BlockReason(string id)
+    {
+        var card = FindCard(id);
+        if (card is null)
+        {
+            return null;
+        }
+        return card.State is CardState.Downloading or CardState.Launching or CardState.Running
+            ? "That server is busy right now - wait until it finishes."
+            : null;
+    }
+
+    private ServerCardViewModel? FindCard(string id)
+    {
+        return Home.Servers.FirstOrDefault(c => string.Equals(c.Server.Id, id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void AddCard(ServerEntry server, bool isCustom)
+    {
+        if (FindCard(server.Id) != null)
+        {
+            return;
+        }
+        var card = new ServerCardViewModel(server, this, isCustom);
+        Home.Servers.Insert(ComputeInsertIndex(server.Id), card);
+        Mods.SetServers(Home.Servers);
+        _ = InitializeCardAsync(card);
+    }
+
+    private void RemoveCard(string id)
+    {
+        var card = FindCard(id);
+        if (card is null)
+        {
+            return;
+        }
+        Home.Servers.Remove(card);
+        // Re-registering the remaining cards also drops the removed card's verification
+        // subscription, so its mods disappear from the MODS union.
+        Mods.SetServers(Home.Servers);
+    }
+
+    private int ComputeInsertIndex(string id)
+    {
+        var index = 0;
+        foreach (var entry in BuildServerList())
+        {
+            if (string.Equals(entry.Server.Id, id, StringComparison.OrdinalIgnoreCase))
+            {
+                return Math.Min(index, Home.Servers.Count);
+            }
+            if (FindCard(entry.Server.Id) != null)
+            {
+                index++;
+            }
+        }
+        return Home.Servers.Count;
+    }
+
+    private async Task InitializeCardAsync(ServerCardViewModel card)
+    {
+        try
+        {
+            await card.RefreshStatusAsync(_cts.Token);
+            await card.VerifyAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Initializing the new server card failed");
+        }
+    }
+
+    private void SaveSettingsSafe(string failureMessage)
+    {
+        try
+        {
+            SettingsService.Save();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, failureMessage);
+            StatusBanner = failureMessage;
+        }
+    }
+
+    [RelayCommand]
+    private void ShowAddServer()
+    {
+        Dialog = new AddServerDialogViewModel(this);
+    }
+
+    [RelayCommand]
+    private void ShowEditServers()
+    {
+        Dialog = new EditServersDialogViewModel(this);
+    }
+
+    [RelayCommand]
+    private void CloseDialog()
+    {
+        Dialog = null;
     }
 
     /// <summary>
@@ -287,12 +526,49 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
         // Only rebuilt when something actually changed - clearing the collection on every
         // tick would reset the NEWS scroll position and flicker for no reason.
+        MarkNewNews(incoming);
         Home.News.Clear();
         foreach (var item in incoming)
         {
             Home.News.Add(item);
         }
         Log.Information("News refreshed from live config: {Count} item(s)", incoming.Count);
+    }
+
+    private readonly HashSet<string> _sessionNewNews = new();
+
+    private void MarkNewNews(List<NewsItem> items)
+    {
+        var seen = SettingsService.Settings.SeenNewsIds ??= new List<string>();
+        var dirty = false;
+        foreach (var item in items)
+        {
+            var key = string.IsNullOrWhiteSpace(item.Id) ? item.Date + "|" + item.Title : item.Id;
+            if (!seen.Contains(key))
+            {
+                seen.Add(key);
+                _sessionNewNews.Add(key);
+                dirty = true;
+            }
+            item.IsNew = _sessionNewNews.Contains(key);
+        }
+        if (seen.Count > 200)
+        {
+            seen.RemoveRange(0, seen.Count - 200);
+            dirty = true;
+        }
+        if (!dirty)
+        {
+            return;
+        }
+        try
+        {
+            SettingsService.Save();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Persisting seen news ids failed");
+        }
     }
 
     private bool NewsMatches(List<NewsItem> incoming)

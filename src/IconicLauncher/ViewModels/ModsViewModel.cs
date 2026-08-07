@@ -81,6 +81,13 @@ public sealed partial class ModsViewModel : ObservableObject
 
     public void SetServers(IEnumerable<ServerCardViewModel> cards)
     {
+        // Called again whenever the player adds, hides or deletes a server. Without the
+        // unsubscribe, every re-registration would stack another RefreshRows handler on
+        // the cards that were already in the list.
+        foreach (var existing in _cards)
+        {
+            existing.VerificationCompleted -= RefreshRows;
+        }
         _cards.Clear();
         foreach (var card in cards)
         {

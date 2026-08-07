@@ -22,7 +22,17 @@
         <DataTemplate DataType="{x:Type vm:AdminViewModel}">
             <views:AdminView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AddServerDialogViewModel}">
+            <views:AddServerDialog/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EditServersDialogViewModel}">
+            <views:EditServersDialog/>
+        </DataTemplate>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseDialogCommand}"/>
+    </Window.InputBindings>
+    <Grid>
     <DockPanel>
         <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="20,0">
             <Grid Height="60">
@@ -36,6 +46,49 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="ICONIC" FontSize="22" FontWeight="Black" Foreground="{StaticResource AccentBrush}"/>
                     <TextBlock Text=" PvE" FontSize="22" FontWeight="Black" Foreground="{StaticResource HotBrush}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="26,0,0,0">
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="HOME" IsChecked="True" Command="{Binding NavigateCommand}" CommandParameter="HOME"/>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="MODS">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="MODS" VerticalAlignment="Center"/>
+                            <Border Margin="8,0,0,0" Padding="7,1" CornerRadius="8" VerticalAlignment="Center"
+                                    Background="{StaticResource StatusAmberBrush}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Mods.HasAnyNeedsUpdate}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="ModsBadgePulse">
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.4"
+                                                                             Duration="0:0:0.9" AutoReverse="True" RepeatBehavior="Forever"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="ModsBadgePulse"/>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Mods.NeedsUpdateCount}" FontSize="10" FontWeight="Bold" Foreground="#1A1A1A"/>
+                            </Border>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="SETTINGS">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="SETTINGS"/>
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource StatusRedBrush}"
+                                       Margin="8,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding SettingsPage.IsProfileNameSuspicious, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="ADMIN" Command="{Binding NavigateCommand}" CommandParameter="ADMIN"
+                                 Visibility="{Binding IsAdminMode, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
                     <Button Command="{Binding OpenWebsiteCommand}" Margin="0,0,10,0"
@@ -90,51 +143,25 @@
                 Visibility="{Binding StatusBanner, Converter={StaticResource NullToVis}}">
             <TextBlock Text="{Binding StatusBanner}" Foreground="{StaticResource StatusAmberBrush}" FontSize="12" TextWrapping="Wrap"/>
         </Border>
-        <Border DockPanel.Dock="Left" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,1,0" Width="180">
-            <StackPanel Margin="0,18,0,0">
-                <RadioButton Style="{StaticResource NavItem}" GroupName="Nav" Content="HOME" IsChecked="True" Command="{Binding NavigateCommand}" CommandParameter="HOME"/>
-                <RadioButton Style="{StaticResource NavItem}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="MODS">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="MODS" VerticalAlignment="Center"/>
-                        <Border Margin="8,0,0,0" Padding="7,1" CornerRadius="8" VerticalAlignment="Center"
-                                Background="{StaticResource StatusAmberBrush}">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Mods.HasAnyNeedsUpdate}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard x:Name="ModsBadgePulse">
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.4"
-                                                                         Duration="0:0:0.9" AutoReverse="True" RepeatBehavior="Forever"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.EnterActions>
-                                            <DataTrigger.ExitActions>
-                                                <StopStoryboard BeginStoryboardName="ModsBadgePulse"/>
-                                            </DataTrigger.ExitActions>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding Mods.NeedsUpdateCount}" FontSize="10" FontWeight="Bold" Foreground="#1A1A1A"/>
-                        </Border>
-                    </StackPanel>
-                </RadioButton>
-                <RadioButton Style="{StaticResource NavItem}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="SETTINGS">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="SETTINGS"/>
-                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource StatusRedBrush}"
-                                   Margin="8,0,0,0" VerticalAlignment="Center"
-                                   Visibility="{Binding SettingsPage.IsProfileNameSuspicious, Converter={StaticResource BoolToVis}}"/>
-                    </StackPanel>
-                </RadioButton>
-                <RadioButton Style="{StaticResource NavItem}" GroupName="Nav" Content="ADMIN" Command="{Binding NavigateCommand}" CommandParameter="ADMIN"
-                             Visibility="{Binding IsAdminMode, Converter={StaticResource BoolToVis}}"/>
-            </StackPanel>
-        </Border>
         <ContentControl Content="{Binding CurrentViewModel}"/>
     </DockPanel>
+    <Border Background="#C0070809" Visibility="{Binding Dialog, Converter={StaticResource NullToVis}}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Dialog, Converter={StaticResource NullToVis}}" Value="Visible">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.14"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <ContentControl Content="{Binding Dialog}" Margin="24"/>
+    </Border>
+    </Grid>
 </Window>

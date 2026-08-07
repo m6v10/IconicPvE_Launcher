@@ -31,6 +31,12 @@ public sealed class LauncherSettings
     public double WindowWidth { get; set; } = 1100;
     public double WindowHeight { get; set; } = 700;
     public List<string> FavoriteModIds { get; set; } = new();
+    public bool DebugLogging { get; set; }
+    public List<DateTime> LogUploadTimesUtc { get; set; } = new();
+    public List<string> ServerOrder { get; set; } = new();
+    public List<string> SeenNewsIds { get; set; } = new();
+    public List<ServerEntry> CustomServers { get; set; } = new();
+    public Dictionary<string, bool> ServerVisibility { get; set; } = new();
 }
 
 public sealed class AdminSettings

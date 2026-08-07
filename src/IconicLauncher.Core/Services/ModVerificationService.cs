@@ -94,6 +94,9 @@ public sealed class ModVerificationService : IModVerificationService
                 Log.Warning("Integrity issue for {WorkshopId}: {Issue}", id, issue);
             }
         }
+        foreach (var r in results.Where(x => x.State != ModState.Ready))
+            Log.Debug("Verify {WorkshopId} ({Name}): state={State} local={Local} remote={Remote} reason={Reason}",
+                r.Mod.WorkshopId, r.Mod.Name, r.State, r.LocalManifest, r.RemoteManifest, r.FailReason ?? r.IntegrityIssue);
         return results;
     }
 

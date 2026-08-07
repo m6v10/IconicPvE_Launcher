@@ -10,6 +10,8 @@ public static class LauncherConstants
     /// </summary>
     public const string DefaultConfigUrl = "https://iconic-pve.com/wp-content/uploads/launcher/launcher-config.json";
 
+    public const string LogUploadUrl = "https://iconic-pve.com/wp-json/iconic/v1/logdump";
+
     /// <summary>
     /// Sent on every outbound request. Shared hosts commonly reject requests with no User-Agent
     /// via mod_security, which would silently degrade the launcher to cached/embedded config.

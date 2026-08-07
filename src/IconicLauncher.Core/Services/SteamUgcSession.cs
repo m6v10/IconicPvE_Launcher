@@ -312,6 +312,8 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
             || mod.State is ModState.Outdated or ModState.NotInstalled
             || installed == null
             || !DirectoryHasContent(contentDir);
+        Log.Debug("UpdateModAsync {WorkshopId}: state={State} localManifest={Local} remoteManifest={Remote} acfManifest={Acf} manifestDiffers={Differs} dirHasContent={HasContent} needsWork={NeedsWork}",
+            mod.Mod.WorkshopId, mod.State, mod.LocalManifest, mod.RemoteManifest, installed?.Manifest, manifestDiffers, DirectoryHasContent(contentDir), needsWork);
         if (!needsWork)
         {
             mod.State = ModState.Ready;
@@ -458,6 +460,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
                 mod.RemoteManifest = d.HContentFile;
                 mod.RemoteFileSize = d.FileSize;
                 mod.RemoteTimeUpdated = d.TimeUpdated;
+                Log.Debug("Remote details for {WorkshopId}: manifest={Manifest} size={Size} timeUpdated={TimeUpdated}", mod.Mod.WorkshopId, d.HContentFile, d.FileSize, d.TimeUpdated);
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -491,7 +494,10 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
         var subscribeResult = await SubscribeSingleAsync(pid, ct).ConfigureAwait(false);
         if (subscribeResult != EResult.k_EResultOK)
             Log.Warning("SubscribeItem for {WorkshopId} returned {Result}", id, subscribeResult);
+        else
+            Log.Debug("SubscribeItem OK for {WorkshopId}", id);
 
+        Log.Debug("Item state for {WorkshopId} before DownloadItem: {State}", id, (EItemState)SteamUGC.GetItemState(pid));
         if (!SteamUGC.DownloadItem(pid, true))
         {
             mod.State = ModState.Failed;
@@ -506,6 +512,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
 
         var lastProgressAt = DateTime.UtcNow;
         var lastBytes = mod.BytesDownloaded;
+        var lastLoggedState = (EItemState)(-1);
         while (true)
         {
             ct.ThrowIfCancellationRequested();
@@ -515,6 +522,11 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
                 await Task.Delay(PumpMs, ct).ConfigureAwait(false);
             }
             var state = (EItemState)SteamUGC.GetItemState(pid);
+            if (state != lastLoggedState)
+            {
+                Log.Debug("Item state changed for {WorkshopId}: {State}, downloaded={Downloaded}/{Total}", id, state, mod.BytesDownloaded, mod.BytesTotal);
+                lastLoggedState = state;
+            }
             if (SteamUGC.GetItemDownloadInfo(pid, out var downloaded, out var total) && total > 0)
             {
                 mod.BytesDownloaded = downloaded;

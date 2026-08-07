@@ -47,7 +47,7 @@ public partial class App : Application
         {
             Directory.CreateDirectory(logDir);
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.ControlledBy(LogLevelController.Switch)
                 .WriteTo.File(Path.Combine(logDir, "launcher-.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
                 .CreateLogger();
         }
@@ -76,6 +76,11 @@ public partial class App : Application
         try
         {
             var settingsService = new SettingsService();
+            LogLevelController.SetDebug(settingsService.Settings.DebugLogging);
+            if (settingsService.Settings.DebugLogging)
+            {
+                Log.Debug("Debug logging enabled from settings");
+            }
             var configUrl = settingsService.Settings.ConfigUrlOverride ?? LauncherConstants.DefaultConfigUrl;
             var configService = new RemoteConfigService(configUrl, settingsService.AppDataDir, ReadEmbeddedFallback);
             var steamLocator = new SteamLibraryLocator();

@@ -3,7 +3,7 @@
     "generatedUtc":  "2026-08-01T06:21:22Z",
     "websiteUrl":  "https://iconic-pve.com",
     "launcher":  {
-                     "latestVersion":  "1.0.3",
+                     "latestVersion":  "1.0.5",
                      "downloadUrl":  "",
                      "sha256":  "",
                      "changelog":  ""
@@ -427,8 +427,8 @@
                         "ip":  "172.111.51.200",
                         "gamePort":  2302,
                         "queryPort":  2303,
-                        "restartIntervalHours":  0,
-                        "restartAnchorHour":  1,
+                        "restartIntervalHours":  3,
+                        "restartAnchorHour":  2,
                         "restartTimeZone":  "Europe/Zurich",
                         "mods":  [
                                      {
@@ -631,8 +631,8 @@
                         "ip":  "172.111.51.200",
                         "gamePort":  2402,
                         "queryPort":  2403,
-                        "restartIntervalHours":  0,
-                        "restartAnchorHour":  1,
+                        "restartIntervalHours":  3,
+                        "restartAnchorHour":  2,
                         "restartTimeZone":  "Europe/Zurich",
                         "mods":  [
                                      {
@@ -836,6 +836,7 @@
                         "gamePort":  2702,
                         "queryPort":  2703,
                         "modsFromQuery":  true,
+                        "optional":  true,
                         "restartIntervalHours":  3,
                         "restartAnchorHour":  1,
                         "restartTimeZone":  "Europe/Zurich",

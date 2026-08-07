@@ -33,6 +33,7 @@ public sealed class ServerEntry
     public int GamePort { get; set; }
     public int QueryPort { get; set; }
     public bool ModsFromQuery { get; set; }
+    public bool Optional { get; set; }
     public int RestartIntervalHours { get; set; }
     public int RestartAnchorHour { get; set; } = 1;
     public string RestartTimeZone { get; set; } = "Europe/Zurich";
@@ -52,4 +53,7 @@ public sealed class NewsItem
     public string Title { get; set; } = "";
     public string Body { get; set; } = "";
     public string? Url { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool IsNew { get; set; }
 }

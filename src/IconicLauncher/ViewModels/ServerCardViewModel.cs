@@ -28,14 +28,16 @@ public sealed partial class ServerCardViewModel : ObservableObject
     public ServerEntry Server { get; }
     public string Name => Server.Name;
     public int ModCount => Server.Mods.Count;
+    public bool IsCustom { get; }
     public IReadOnlyList<ModVerificationResult> Verification => _verification;
 
     public event Action? VerificationCompleted;
 
-    public ServerCardViewModel(ServerEntry server, MainViewModel owner)
+    public ServerCardViewModel(ServerEntry server, MainViewModel owner, bool isCustom = false)
     {
         Server = server;
         _owner = owner;
+        IsCustom = isCustom;
         UpdateRestartCountdown();
     }
 
@@ -96,6 +98,18 @@ public sealed partial class ServerCardViewModel : ObservableObject
     private void TogglePasswordEntry()
     {
         PasswordEntryOpen = !PasswordEntryOpen;
+    }
+
+    [RelayCommand]
+    private void MoveUp()
+    {
+        _owner.MoveServerCard(this, -1);
+    }
+
+    [RelayCommand]
+    private void MoveDown()
+    {
+        _owner.MoveServerCard(this, 1);
     }
 
     [RelayCommand]

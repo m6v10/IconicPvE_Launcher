@@ -1,6 +1,9 @@
+using System.IO;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IconicLauncher.Core.Services;
+using IconicLauncher.Core.Utils;
 using Serilog;
 
 namespace IconicLauncher.ViewModels;
@@ -57,6 +60,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? saveStatus;
 
+    [ObservableProperty]
+    private bool debugLogging;
+
+    [ObservableProperty]
+    private string? dumpStatus;
+
+    [ObservableProperty]
+    private string? sendStatus;
+
     public SettingsViewModel(MainViewModel owner)
     {
         _owner = owner;
@@ -72,6 +84,27 @@ public sealed partial class SettingsViewModel : ObservableObject
         LaunchNoPause = s.LaunchNoPause;
         LaunchWindowed = s.LaunchWindowed;
         LaunchDoLogs = s.LaunchDoLogs;
+        DebugLogging = s.DebugLogging;
+    }
+
+    partial void OnDebugLoggingChanged(bool value)
+    {
+        LogLevelController.SetDebug(value);
+        Log.Information("Debug logging {State}", value ? "enabled" : "disabled");
+        var s = _owner.SettingsService.Settings;
+        if (s.DebugLogging == value)
+        {
+            return;
+        }
+        s.DebugLogging = value;
+        try
+        {
+            _owner.SettingsService.Save();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Persisting the debug logging toggle failed");
+        }
     }
 
     public bool IsProfileNameSurvivor => ProfileName.Trim().Equals("Survivor", StringComparison.OrdinalIgnoreCase);
@@ -113,6 +146,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.LaunchNoPause = LaunchNoPause;
         s.LaunchWindowed = LaunchWindowed;
         s.LaunchDoLogs = LaunchDoLogs;
+        s.DebugLogging = DebugLogging;
         try
         {
             _owner.SettingsService.Save();
@@ -124,5 +158,56 @@ public sealed partial class SettingsViewModel : ObservableObject
             SaveStatus = "Saving failed: " + ex.Message;
         }
         _owner.OnSettingsSaved();
+    }
+
+    [RelayCommand]
+    private void DumpLogs()
+    {
+        try
+        {
+            Log.Information("Building logdump for desktop");
+            var path = LogDumpService.WriteToDesktop(BuildDump(), DateTime.Now);
+            DumpStatus = "Saved to Desktop: " + Path.GetFileName(path);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Logdump to desktop failed");
+            DumpStatus = "Failed: " + ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SendLogsAsync()
+    {
+        var settings = _owner.SettingsService.Settings;
+        var limitMessage = LogUploadService.CheckRateLimit(settings, DateTime.UtcNow);
+        if (limitMessage != null)
+        {
+            SendStatus = limitMessage;
+            return;
+        }
+        SendStatus = "Sending...";
+        try
+        {
+            Log.Information("Building logdump for upload");
+            var (ok, message) = await new LogUploadService().UploadAsync(BuildDump());
+            if (ok)
+            {
+                LogUploadService.RecordUpload(settings, DateTime.UtcNow);
+                _owner.SettingsService.Save();
+            }
+            SendStatus = message;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Logdump upload failed");
+            SendStatus = "Failed: " + ex.Message;
+        }
+    }
+
+    private string BuildDump()
+    {
+        var logDir = Path.Combine(_owner.SettingsService.AppDataDir, "logs");
+        return LogDumpService.BuildDump(logDir, _owner.VersionLabel, _owner.SettingsService.Settings, DateTime.UtcNow);
     }
 }

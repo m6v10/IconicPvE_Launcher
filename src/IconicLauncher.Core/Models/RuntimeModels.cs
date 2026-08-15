@@ -37,6 +37,9 @@ public sealed class LauncherSettings
     public List<string> SeenNewsIds { get; set; } = new();
     public List<ServerEntry> CustomServers { get; set; } = new();
     public Dictionary<string, bool> ServerVisibility { get; set; } = new();
+    public string DefaultGame { get; set; } = "last";
+    public string LastGame { get; set; } = "DAYZ";
+    public string? WowClientPath { get; set; }
 }
 
 public sealed class AdminSettings

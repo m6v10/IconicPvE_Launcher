@@ -10,7 +10,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Background="{StaticResource AccentTintBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1"
+            <Border Background="{DynamicResource AccentTintBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1"
                     CornerRadius="12,12,0,0" Padding="22,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -18,7 +18,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{DynamicResource AccentBrush}"
                                VerticalAlignment="Center" Margin="0,0,14,0"/>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="ADD A SERVER" Style="{StaticResource DialogTitle}"/>
@@ -72,7 +72,7 @@
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="{StaticResource Surface2Brush}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ProbeOk}" Value="True">
                                     <Setter Property="Background" Value="#1F4CAF50"/>
@@ -112,7 +112,7 @@
                            Visibility="{Binding ErrorText, Converter={StaticResource NullToVis}}"/>
             </StackPanel>
 
-            <Border Grid.Row="2" Background="{StaticResource BgBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0"
+            <Border Grid.Row="2" Background="{StaticResource BgBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,1,0,0"
                     CornerRadius="0,0,12,12" Padding="22,14" Margin="0,18,0,0">
                 <Grid>
                     <TextBlock Text="Mods are pulled from this server every time you join." FontSize="10"

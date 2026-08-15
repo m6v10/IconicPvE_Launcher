@@ -24,8 +24,14 @@
             "restartAnchorHour": 1,
             "restartTimeZone": "Europe/Zurich",
             "mods": [
-                { "workshopId": "1559212036", "name": "CF" },
-                { "workshopId": "2545327648", "name": "Dabs Framework" }
+                {
+                    "workshopId": "1559212036",
+                    "name": "CF"
+                },
+                {
+                    "workshopId": "2545327648",
+                    "name": "Dabs Framework"
+                }
             ]
         },
         {
@@ -47,5 +53,23 @@
             "body": "Shown on the launcher's Home tab. Newest entry goes first.",
             "url": null
         }
-    ]
+    ],
+    "wow": {
+        "name": "Example WoW Realm",
+        "clientVersion": "3.3.5a",
+        "ip": "127.0.0.1",
+        "authPort": 3724,
+        "worldPort": 8085,
+        "realmlist": "set realmlist play.example.com",
+        "manifestUrl": "https://example.com/launcher/wow/manifest.json",
+        "filesBaseUrl": "https://example.com/launcher/wow/files",
+        "statusUrl": null,
+        "fullClientUrl": null,
+        "fullClientSizeBytes": 18253611008,
+        "fullManifestUrl": "https://example.com/launcher/wow/full/manifest.json",
+        "fullFilesBaseUrl": "https://example.com/launcher/wow/full/files",
+        "addonsUrl": "https://example.com/launcher/wow/addons/addons.json",
+        "addonsFilesBaseUrl": "https://example.com/launcher/wow/addons/files",
+        "news": []
+    }
 }

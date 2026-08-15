@@ -95,6 +95,8 @@ public partial class App : Application
             _rpc = new DiscordRichPresenceService();
             var adminConfigBuilder = new AdminConfigBuilder();
             var ftpPublishService = new FtpPublishService();
+            var wowPatchService = new WowPatchService();
+            var wowStatusService = new WowStatusService();
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             var versionText = version is null ? "1.0.0" : $"{version.Major}.{version.Minor}.{Math.Max(version.Build, 0)}";
             _mainViewModel = new MainViewModel(
@@ -111,6 +113,8 @@ public partial class App : Application
                 _rpc,
                 adminConfigBuilder,
                 ftpPublishService,
+                wowPatchService,
+                wowStatusService,
                 adminMode,
                 versionText);
             _mainViewModel.ExitRequested += () => Dispatcher.Invoke(Shutdown);

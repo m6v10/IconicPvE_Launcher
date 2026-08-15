@@ -22,6 +22,12 @@
         <DataTemplate DataType="{x:Type vm:AdminViewModel}">
             <views:AdminView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WowViewModel}">
+            <views:WowHomeView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WowAddonsViewModel}">
+            <views:WowAddonsView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AddServerDialogViewModel}">
             <views:AddServerDialog/>
         </DataTemplate>
@@ -34,7 +40,7 @@
     </Window.InputBindings>
     <Grid>
     <DockPanel>
-        <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="20,0">
+        <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="20,0">
             <Grid Height="60">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -43,13 +49,29 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="ICONIC" FontSize="22" FontWeight="Black" Foreground="{StaticResource AccentBrush}"/>
-                    <TextBlock Text=" PvE" FontSize="22" FontWeight="Black" Foreground="{StaticResource HotBrush}"/>
-                </StackPanel>
+                <Grid Width="160" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <TextBlock Text="ICONIC" FontSize="22" FontWeight="Black" Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="{Binding GameSuffixText}" FontSize="22" FontWeight="Black">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource HotBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsWowActive}" Value="True">
+                                            <Setter Property="Foreground" Value="#69CCF0"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="26,0,0,0">
-                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="HOME" IsChecked="True" Command="{Binding NavigateCommand}" CommandParameter="HOME"/>
-                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="MODS">
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="HOME"
+                                 IsChecked="{Binding IsHomeChecked, Mode=OneWay}" Command="{Binding NavigateCommand}" CommandParameter="HOME"/>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="MODS"
+                                 IsChecked="{Binding IsModsChecked, Mode=OneWay}"
+                                 Visibility="{Binding IsDayZActive, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="MODS" VerticalAlignment="Center"/>
                             <Border Margin="8,0,0,0" Padding="7,1" CornerRadius="8" VerticalAlignment="Center"
@@ -79,7 +101,11 @@
                             </Border>
                         </StackPanel>
                     </RadioButton>
-                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="SETTINGS">
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="ADD-ONS" Command="{Binding NavigateCommand}" CommandParameter="ADDONS"
+                                 IsChecked="{Binding IsAddonsChecked, Mode=OneWay}"
+                                 Visibility="{Binding IsWowActive, Converter={StaticResource BoolToVis}}"/>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="SETTINGS"
+                                 IsChecked="{Binding IsSettingsChecked, Mode=OneWay}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="SETTINGS"/>
                             <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource StatusRedBrush}"
@@ -88,16 +114,24 @@
                         </StackPanel>
                     </RadioButton>
                     <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="ADMIN" Command="{Binding NavigateCommand}" CommandParameter="ADMIN"
+                                 IsChecked="{Binding IsAdminChecked, Mode=OneWay}"
                                  Visibility="{Binding IsAdminMode, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
-                    <Button Command="{Binding OpenWebsiteCommand}" Margin="0,0,10,0"
-                            Visibility="{Binding WebsiteUrl, Converter={StaticResource NullToVis}}">
+                    <Border Margin="0,0,14,0" VerticalAlignment="Center" Background="{StaticResource Surface2Brush}" CornerRadius="8" Padding="2">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE774;" FontFamily="Segoe MDL2 Assets" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="WEBSITE" VerticalAlignment="Center"/>
+                            <RadioButton Style="{StaticResource GameSwitchItem}" GroupName="Game" ToolTip="Switch to DayZ"
+                                         IsChecked="{Binding IsDayZActive, Mode=OneWay}"
+                                         Command="{Binding SwitchGameCommand}" CommandParameter="DAYZ">
+                                <Image Source="/Assets/dayz_logo.png" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </RadioButton>
+                            <RadioButton Style="{StaticResource GameSwitchItem}" GroupName="Game" ToolTip="Switch to WoW"
+                                         IsChecked="{Binding IsWowActive, Mode=OneWay}"
+                                         Command="{Binding SwitchGameCommand}" CommandParameter="WOW">
+                                <Image Source="/Assets/wow_logo.png" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </RadioButton>
                         </StackPanel>
-                    </Button>
+                    </Border>
                     <Button Command="{Binding RunSelfUpdateCommand}" Margin="0,0,10,0">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource StatusGreenButton}">
@@ -125,21 +159,28 @@
                             <TextBlock Text="UPDATE" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <Button Command="{Binding OpenWebsiteCommand}" Margin="0,0,10,0"
+                            Visibility="{Binding WebsiteUrl, Converter={StaticResource NullToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE774;" FontFamily="Segoe MDL2 Assets" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="WEBSITE" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Button Content="DISCORD" Command="{Binding OpenDiscordCommand}"/>
                 </StackPanel>
                 <TextBlock Grid.Column="4" Text="{Binding VersionLabel}" Foreground="{StaticResource MutedBrush}" FontSize="11" VerticalAlignment="Center"/>
             </Grid>
         </Border>
-        <Border DockPanel.Dock="Top" Background="{StaticResource AccentTintBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="20,10"
+        <Border DockPanel.Dock="Top" Background="{DynamicResource AccentTintBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1" Padding="20,10"
                 Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding UpdateBannerText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource AccentSoftBrush}"/>
+                <TextBlock Text="{Binding UpdateBannerText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource AccentSoftBrush}"/>
                 <Button Content="DOWNLOAD + RESTART" Style="{StaticResource PrimaryButton}" Padding="14,6" Margin="16,0,0,0" Command="{Binding RunSelfUpdateCommand}"/>
                 <ProgressBar Width="180" Height="8" Margin="16,0,0,0" VerticalAlignment="Center" Maximum="100" Value="{Binding UpdateProgress, Mode=OneWay}"
                              Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
         </Border>
-        <Border DockPanel.Dock="Bottom" Background="{StaticResource Surface2Brush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="20,8"
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource Surface2Brush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,1,0,0" Padding="20,8"
                 Visibility="{Binding StatusBanner, Converter={StaticResource NullToVis}}">
             <TextBlock Text="{Binding StatusBanner}" Foreground="{StaticResource StatusAmberBrush}" FontSize="12" TextWrapping="Wrap"/>
         </Border>

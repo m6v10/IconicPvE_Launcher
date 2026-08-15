@@ -40,6 +40,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public ModsViewModel Mods { get; }
     public SettingsViewModel SettingsPage { get; }
     public AdminViewModel? Admin { get; }
+    public WowViewModel Wow { get; }
+    public WowAddonsViewModel WowAddons { get; }
     public bool IsAdminMode { get; }
     public string VersionLabel { get; }
 
@@ -80,6 +82,36 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private object? dialog;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDayZActive))]
+    [NotifyPropertyChangedFor(nameof(IsWowActive))]
+    [NotifyPropertyChangedFor(nameof(GameSuffixText))]
+    private string activeGame = "DAYZ";
+
+    public bool IsDayZActive => ActiveGame == "DAYZ";
+    public bool IsWowActive => ActiveGame == "WOW";
+    public string GameSuffixText => IsWowActive ? " WoW" : " PvE";
+
+    partial void OnActiveGameChanged(string value)
+    {
+        GameTheme.Apply(IsWowActive);
+    }
+
+    public bool IsHomeChecked => CurrentViewModel is HomeViewModel or WowViewModel;
+    public bool IsModsChecked => CurrentViewModel is ModsViewModel;
+    public bool IsAddonsChecked => CurrentViewModel is WowAddonsViewModel;
+    public bool IsSettingsChecked => CurrentViewModel is SettingsViewModel;
+    public bool IsAdminChecked => CurrentViewModel is AdminViewModel;
+
+    partial void OnCurrentViewModelChanged(object? value)
+    {
+        OnPropertyChanged(nameof(IsHomeChecked));
+        OnPropertyChanged(nameof(IsModsChecked));
+        OnPropertyChanged(nameof(IsAddonsChecked));
+        OnPropertyChanged(nameof(IsSettingsChecked));
+        OnPropertyChanged(nameof(IsAdminChecked));
+    }
+
     public MainViewModel(
         ISettingsService settingsService,
         IRemoteConfigService configService,
@@ -94,6 +126,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         DiscordRichPresenceService rpc,
         IAdminConfigBuilder adminConfigBuilder,
         IFtpPublishService ftpPublishService,
+        IWowPatchService wowPatchService,
+        IWowStatusService wowStatusService,
         bool adminMode,
         string version)
     {
@@ -114,7 +148,15 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Mods = new ModsViewModel(this);
         SettingsPage = new SettingsViewModel(this);
         Admin = adminMode ? new AdminViewModel(this, adminConfigBuilder, ftpPublishService) : null;
-        CurrentViewModel = Home;
+        Wow = new WowViewModel(this, wowPatchService, wowStatusService);
+        WowAddons = new WowAddonsViewModel(this, wowPatchService);
+        ActiveGame = settingsService.Settings.DefaultGame?.ToLowerInvariant() switch
+        {
+            "dayz" => "DAYZ",
+            "wow" => "WOW",
+            _ => string.Equals(settingsService.Settings.LastGame, "WOW", StringComparison.OrdinalIgnoreCase) ? "WOW" : "DAYZ"
+        };
+        CurrentViewModel = IsWowActive ? Wow : Home;
         _restartTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
         _restartTimer.Tick += OnRestartTimerTick;
         _restartTimer.Start();
@@ -225,6 +267,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             LocateSteam();
             InitializeRpc();
             StartPollLoop();
+            _ = Wow.InitializeAsync();
             await VerifyAllAsync();
         }
         catch (Exception ex)
@@ -272,6 +315,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
         Mods.SetServers(Home.Servers);
         Admin?.SetTemplate(config);
+        Wow.ApplyConfig(config.Wow);
+        WowAddons.ApplyConfig(config.Wow);
     }
 
     public void MoveServerCard(ServerCardViewModel card, int delta)
@@ -514,6 +559,11 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void RefreshLiveContent(LauncherConfig config)
     {
         WebsiteUrl = string.IsNullOrWhiteSpace(config.WebsiteUrl) ? null : config.WebsiteUrl.Trim();
+        if (!Wow.IsApplying && !Wow.IsVerifying)
+        {
+            Wow.ApplyConfig(config.Wow);
+            WowAddons.ApplyConfig(config.Wow);
+        }
 
         // Home.Servers is deliberately NOT rebuilt here. Recreating the cards would throw
         // away ServerCardViewModels that may be mid-verification or mid-launch, which is the
@@ -662,6 +712,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             {
                 Log.Warning(ex, "Server status poll failed");
             }
+            await Wow.RefreshStatusSafeAsync(ct);
             try
             {
                 await Task.Delay(TimeSpan.FromSeconds(5), ct);
@@ -706,6 +757,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             case "MODS":
                 CurrentViewModel = Mods;
                 break;
+            case "ADDONS":
+                CurrentViewModel = WowAddons;
+                WowAddons.OnNavigatedTo();
+                break;
             case "SETTINGS":
                 CurrentViewModel = SettingsPage;
                 break;
@@ -713,9 +768,26 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                 if (Admin != null) CurrentViewModel = Admin;
                 break;
             default:
-                CurrentViewModel = Home;
+                CurrentViewModel = IsWowActive ? Wow : Home;
                 break;
         }
+    }
+
+    [RelayCommand]
+    private void SwitchGame(string? game)
+    {
+        var target = string.Equals(game, "WOW", StringComparison.OrdinalIgnoreCase) ? "WOW" : "DAYZ";
+        if (ActiveGame != target)
+        {
+            ActiveGame = target;
+            var settings = SettingsService.Settings;
+            if (!string.Equals(settings.LastGame, target, StringComparison.OrdinalIgnoreCase))
+            {
+                settings.LastGame = target;
+                SaveSettingsSafe("Persisting the game selection failed");
+            }
+        }
+        CurrentViewModel = IsWowActive ? Wow : Home;
     }
 
     [RelayCommand]
@@ -806,7 +878,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         StatusBanner = null;
         LocateSteam();
         InitializeRpc();
+        Wow.RefreshClientPath();
         _ = VerifyAllSafeAsync();
+        _ = Wow.VerifySafeAsync();
     }
 
     internal void RequestExit()

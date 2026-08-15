@@ -37,7 +37,7 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                             <Setter Property="Text" Value="&#xE735;"/>
-                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -170,7 +170,7 @@
             <ProgressBar Height="8" Margin="0,6,0,0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}"
                          Visibility="{Binding IsUpdatingAll, Converter={StaticResource BoolToVis}}"/>
         </StackPanel>
-        <Border Grid.Row="2" Margin="0,12,0,0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1" CornerRadius="6">
+        <Border Grid.Row="2" Margin="0,12,0,0" Background="{StaticResource SurfaceBrush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="6">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
                 <StackPanel>
                     <TextBlock Text="{Binding NeedsUpdateHeader}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AlertTextBrush}" Margin="8,8,8,4"

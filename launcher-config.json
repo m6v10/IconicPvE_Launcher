@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedUtc": "2026-08-02T14:12:15Z",
+  "generatedUtc": "2026-08-14T21:05:00Z",
   "websiteUrl": "https://iconic-pve.com",
   "launcher": {
-    "latestVersion": "1.0.5",
-    "downloadUrl": "https://iconic-pve.com/wp-content/uploads/launcher/IconicPvE_Launcher-1.0.5.exe",
-    "sha256": "4E5A4A958B663F9BB8E962C9021B7BEFB841A4446ED8A82979826415C7E22AFE",
-    "changelog": "You can now build your own server list: add any DayZ server by IP and port, and hide the ones you do not play on so the launcher stops checking their mods."
+    "latestVersion": "1.1.0",
+    "downloadUrl": "https://iconic-pve.com/wp-content/uploads/launcher/IconicPvE_Launcher-1.1.0.exe",
+    "sha256": "56739D81E94443BBF49E016E0E3276802C7AB05BCB6DB60DEC2C2ACE4E318F1A",
+    "changelog": "World of Warcraft is here: switch games with the logos top right. The launcher keeps your WotLK client patched, can download the full game, and offers 34 optional addons on the new ADD-ONS tab."
   },
   "discord": {
     "inviteUrl": "https://discord.gg/iconicpve",
@@ -845,6 +845,20 @@
   ],
   "news": [
     {
+      "id": "launcher-110",
+      "date": "2026-08-07",
+      "title": "Launcher v1.1.0",
+      "body": "Slimmer Server lists by moving restart warning and mod-state info into upper lines, so more servers are visible at once. Added a switch to our WoW WotLK private server, which is now in the launcher during it's open BETA play-test.",
+      "url": null
+    },
+    {
+      "id": "changelog-110",
+      "date": "2026-08-07",
+      "title": "Today's Changelog",
+      "body": "Dynamic Worldbosses finally fixed and working, some fights already happened. 25% chance per restart for 1-2 dynamic bosses to spawn randomly during that restart. Helping to kill one drops you item-shop coins, redeemable with right-click, which can be used/spend in our new Item-Shop.",
+      "url": "https://discord.com/channels/1047520237031002142/1055898196242595916/1535483525929898064"
+    },
+    {
       "id": "launcher-105",
       "date": "2026-08-07",
       "title": "Launcher v1.0.5",
@@ -886,5 +900,38 @@
       "body": "Iconic PvE US Main and US Lite are now in the launcher. Same 48 mods as EU, so if you are set up for EU you can join either one right away.",
       "url": null
     }
-  ]
+  ],
+  "wow": {
+    "name": "Iconic WoW - Wrath of the Lich King",
+    "clientVersion": "3.3.5a",
+    "ip": "178.82.229.148",
+    "authPort": 3724,
+    "worldPort": 8085,
+    "realmlist": "set realmlist 178.82.229.148",
+    "manifestUrl": "https://cdn.iconic-pve.com/wow/manifest.json",
+    "filesBaseUrl": "https://cdn.iconic-pve.com/wow/files",
+    "statusUrl": null,
+    "fullClientUrl": null,
+    "fullClientSizeBytes": 17955914463,
+    "fullManifestUrl": "https://cdn.iconic-pve.com/wow/full/manifest.json",
+    "fullFilesBaseUrl": "https://cdn.iconic-pve.com/wow/full/files",
+    "addonsUrl": "https://cdn.iconic-pve.com/wow/addons/addons.json",
+    "addonsFilesBaseUrl": "https://cdn.iconic-pve.com/wow/addons/files",
+    "news": [
+      {
+        "id": "wow-launcher",
+        "date": "14.08.2026",
+        "title": "Iconic's WoW WOTLK private server is now in the launcher",
+        "body": "The very first working Launcher for a private WoW server in the world! The launcher keeps your WotLK client up to date: custom items, spell tooltips and our addons are patched automatically before you play. Set your game folder once and press Play.",
+        "url": null
+      },
+      {
+        "id": "wow-register-and-info",
+        "date": "14.08.2026",
+        "title": "Open Play-Test!",
+        "body": "You're now able to register and play on Iconic's WoW WOTLK private server during it's beta play-test phase. The server is in open beta, so you can create a character and play right away. The server will soon migrate to a VPS where it's going to be online 24/7.",
+        "url": "https://iconic-pve.com/ic-world-of-warcraft/"
+      }
+    ]
+  }
 }

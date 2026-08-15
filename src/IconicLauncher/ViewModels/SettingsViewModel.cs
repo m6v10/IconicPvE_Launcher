@@ -52,6 +52,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     private bool launchDoLogs;
 
     [ObservableProperty]
+    private string defaultGame = "last";
+
+    [ObservableProperty]
+    private string wowClientPath = "";
+
+    [ObservableProperty]
     private string autoDetectedDayZPath = "Detecting...";
 
     [ObservableProperty]
@@ -85,6 +91,36 @@ public sealed partial class SettingsViewModel : ObservableObject
         LaunchWindowed = s.LaunchWindowed;
         LaunchDoLogs = s.LaunchDoLogs;
         DebugLogging = s.DebugLogging;
+        DefaultGame = string.IsNullOrWhiteSpace(s.DefaultGame) ? "last" : s.DefaultGame.ToLowerInvariant();
+        WowClientPath = s.WowClientPath ?? "";
+    }
+
+    [ObservableProperty]
+    private string? wowDetectStatus;
+
+    internal void SyncWowPathFromSettings()
+    {
+        WowClientPath = _owner.SettingsService.Settings.WowClientPath ?? "";
+    }
+
+    [RelayCommand]
+    private async Task DetectWowAsync()
+    {
+        WowDetectStatus = "Searching your drives...";
+        var ok = await _owner.Wow.DetectAsync(false);
+        WowClientPath = _owner.SettingsService.Settings.WowClientPath ?? "";
+        WowDetectStatus = ok ? "Found it" : "Not found - enter the path manually";
+    }
+
+    [RelayCommand]
+    private void SetDefaultGame(string? value)
+    {
+        DefaultGame = value switch
+        {
+            "dayz" => "dayz",
+            "wow" => "wow",
+            _ => "last"
+        };
     }
 
     partial void OnDebugLoggingChanged(bool value)
@@ -147,6 +183,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.LaunchWindowed = LaunchWindowed;
         s.LaunchDoLogs = LaunchDoLogs;
         s.DebugLogging = DebugLogging;
+        s.DefaultGame = DefaultGame;
+        s.WowClientPath = string.IsNullOrWhiteSpace(WowClientPath) ? null : WowClientPath.Trim();
         try
         {
             _owner.SettingsService.Save();

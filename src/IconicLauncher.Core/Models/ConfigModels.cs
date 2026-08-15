@@ -9,6 +9,7 @@ public sealed class LauncherConfig
     public DiscordInfo Discord { get; set; } = new();
     public List<ServerEntry> Servers { get; set; } = new();
     public List<NewsItem> News { get; set; } = new();
+    public WowConfig? Wow { get; set; }
 }
 
 public sealed class LauncherInfo

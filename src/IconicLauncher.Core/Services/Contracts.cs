@@ -73,3 +73,18 @@ public interface IModIntegrityChecker
 {
     string? Check(string installPath, long baselineUnixTime);
 }
+
+public interface IWowPatchService
+{
+    Task<WowVerifyResult> VerifyAsync(WowConfig config, string clientRoot, CancellationToken ct = default);
+    Task ApplyAsync(WowConfig config, string clientRoot, WowVerifyResult result, IProgress<WowApplyProgress> progress, CancellationToken ct = default);
+    Task RepairAsync(WowConfig config, string clientRoot, WowVerifyResult result, IProgress<WowApplyProgress> progress, CancellationToken ct = default);
+    bool EnsureRealmlist(WowConfig config, string clientRoot);
+    Task<IReadOnlyList<WowAddonStatus>> FetchAddonsAsync(WowConfig config, string clientRoot, CancellationToken ct = default);
+    Task InstallAddonAsync(WowConfig config, string clientRoot, WowAddonEntry addon, IProgress<WowApplyProgress> progress, CancellationToken ct = default);
+}
+
+public interface IWowStatusService
+{
+    Task<WowRealmStatus> QueryAsync(WowConfig config, CancellationToken ct = default);
+}

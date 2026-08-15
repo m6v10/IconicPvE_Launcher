@@ -3,7 +3,7 @@
     "generatedUtc":  "2026-08-01T06:21:22Z",
     "websiteUrl":  "https://iconic-pve.com",
     "launcher":  {
-                     "latestVersion":  "1.0.5",
+                     "latestVersion":  "1.1.0",
                      "downloadUrl":  "",
                      "sha256":  "",
                      "changelog":  ""
@@ -853,5 +853,31 @@
                      "body":  "Verify your mods and join with one click.",
                      "url":  null
                  }
-             ]
+             ],
+    "wow":  {
+                "name":  "Iconic WoW - Wrath of the Lich King",
+                "clientVersion":  "3.3.5a",
+                "ip":  "178.82.229.148",
+                "authPort":  3724,
+                "worldPort":  8085,
+                "realmlist":  "set realmlist 178.82.229.148",
+                "manifestUrl":  "https://cdn.iconic-pve.com/wow/manifest.json",
+                "filesBaseUrl":  "https://cdn.iconic-pve.com/wow/files",
+                "statusUrl":  null,
+                "fullClientUrl":  null,
+                "fullClientSizeBytes":  17955914463,
+                "fullManifestUrl":  "https://cdn.iconic-pve.com/wow/full/manifest.json",
+                "fullFilesBaseUrl":  "https://cdn.iconic-pve.com/wow/full/files",
+                "addonsUrl":  "https://cdn.iconic-pve.com/wow/addons/addons.json",
+                "addonsFilesBaseUrl":  "https://cdn.iconic-pve.com/wow/addons/files",
+                "news":  [
+                             {
+                                 "id":  "wow-launcher",
+                                 "date":  "14.08.2026",
+                                 "title":  "WoW is now in the launcher",
+                                 "body":  "The launcher keeps your WotLK client up to date: custom items, spell tooltips and our addons are patched automatically before you play. Set your game folder once and press Play.",
+                                 "url":  null
+                             }
+                         ]
+            }
 }

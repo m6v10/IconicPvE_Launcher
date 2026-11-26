@@ -3,166 +3,16 @@
   "generatedUtc": "2026-08-14T21:05:00Z",
   "websiteUrl": "https://iconic-pve.com",
   "launcher": {
-    "latestVersion": "1.2.1",
-    "downloadUrl": "https://iconic-pve.com/wp-content/uploads/launcher/IconicPvE_Launcher-1.2.1.exe",
-    "sha256": "0753BE20DBDFEF70D92433B9E79D23EF84B498B345FB91D34FBF0152C558B67A",
-    "changelog": "A saved server password is no longer sent once the server stops asking for one."
+    "latestVersion": "1.3.0",
+    "downloadUrl": "https://iconic-pve.com/wp-content/uploads/launcher/IconicPvE_Launcher-1.3.0.exe",
+    "sha256": "37D6C39DADF059F93200D33C8CCEB11995BA6B410DC04D2477DAE9AD37E4CB87",
+    "changelog": "New GRAPHICS section in Settings: pick a quality preset or display mode without starting DayZ, a blinking warning icon on SETTINGS while your graphics are above Medium, and a warning before you join (DayZ 1.30 crashes on High/Extreme for many players)."
   },
   "discord": {
     "inviteUrl": "https://discord.gg/iconicpve",
     "applicationId": ""
   },
   "servers": [
-    {
-      "id": "eumain2",
-      "hubKey": "eu-nasdara",
-      "name": "Iconic PvE Badlands - Nasdara MMORPG",
-      "ip": "193.25.252.68",
-      "gamePort": 2602,
-      "queryPort": 2603,
-      "restartIntervalHours": 3,
-      "restartAnchorHour": 1,
-      "restartTimeZone": "Europe/Zurich",
-      "mods": [
-        {
-          "workshopId": "2828486817",
-          "name": "DayZ-Expansion-Quests"
-        },
-        {
-          "workshopId": "2878980498",
-          "name": "RaG_BaseItems"
-        },
-        {
-          "workshopId": "2792982069",
-          "name": "DayZ-Expansion-AI"
-        },
-        {
-          "workshopId": "2572328470",
-          "name": "DayZ-Expansion-Market"
-        },
-        {
-          "workshopId": "2291785308",
-          "name": "DayZ-Expansion-Core"
-        },
-        {
-          "workshopId": "2276010135",
-          "name": "DayZ Editor Loader"
-        },
-        {
-          "workshopId": "3556131153",
-          "name": "RaG_Core"
-        },
-        {
-          "workshopId": "3816371550",
-          "name": "Iconic Server Pack Assets"
-        },
-        {
-          "workshopId": "3605225106",
-          "name": "Iconic Server Pack Equipment"
-        },
-        {
-          "workshopId": "3605259764",
-          "name": "Iconic Server Pack Customs"
-        },
-        {
-          "workshopId": "3434614117",
-          "name": "Iconic Server Pack Essentials"
-        },
-        {
-          "workshopId": "3047413032",
-          "name": "Iconic Server Pack Vehicles"
-        },
-        {
-          "workshopId": "3309721541",
-          "name": "Iconic Server Pack Entities"
-        },
-        {
-          "workshopId": "3077736647",
-          "name": "Iconic Server Pack Core"
-        },
-        {
-          "workshopId": "3047438506",
-          "name": "Iconic Server Pack Systems"
-        },
-        {
-          "workshopId": "3387855369",
-          "name": "4KBOSSKVehiclePackage"
-        },
-        {
-          "workshopId": "3413364741",
-          "name": "AJs Creatures V2"
-        },
-        {
-          "workshopId": "2931560672",
-          "name": "Forward Operator Gear"
-        },
-        {
-          "workshopId": "2663169692",
-          "name": "MMG - Mightys Military Gear"
-        },
-        {
-          "workshopId": "3491661516",
-          "name": "DudeWheresMyCar"
-        },
-        {
-          "workshopId": "3707015798",
-          "name": "Car Camera Controls by DelaDuck"
-        },
-        {
-          "workshopId": "3484152258",
-          "name": "BS Field of View - FOV"
-        },
-        {
-          "workshopId": "1565871491",
-          "name": "BuilderItems"
-        },
-        {
-          "workshopId": "2814571904",
-          "name": "AutoRun"
-        },
-        {
-          "workshopId": "3425994533",
-          "name": "VehicleRecovery"
-        },
-        {
-          "workshopId": "2745352757",
-          "name": "LoftDModGR Clothes Pack"
-        },
-        {
-          "workshopId": "3354931239",
-          "name": "Alevaric's Clothing Overhaul"
-        },
-        {
-          "workshopId": "3167286994",
-          "name": "AutolockVehicles"
-        },
-        {
-          "workshopId": "2851058261",
-          "name": "CJ187-PokemonCards"
-        },
-        {
-          "workshopId": "2393499239",
-          "name": "Terrain Islands"
-        },
-        {
-          "workshopId": "2692979668",
-          "name": "RedFalcon Flight System Heliz"
-        },
-        {
-          "workshopId": "2931436407",
-          "name": "Drippy Sneakers"
-        },
-        {
-          "workshopId": "2545327648",
-          "name": "Dabs Framework"
-        },
-        {
-          "workshopId": "1559212036",
-          "name": "Community Framework"
-        }
-      ],
-      "modsFromQuery": true
-    },
     {
       "id": "eu2deerisle",
       "hubKey": "eu2-deerisle",
@@ -313,6 +163,156 @@
         {
           "workshopId": "3834076725",
           "name": "Iconic Deerisle Core"
+        }
+      ],
+      "modsFromQuery": true
+    },
+    {
+      "id": "eumain2",
+      "hubKey": "eu-nasdara",
+      "name": "Iconic PvE Badlands - Nasdara MMORPG",
+      "ip": "193.25.252.68",
+      "gamePort": 2602,
+      "queryPort": 2603,
+      "restartIntervalHours": 3,
+      "restartAnchorHour": 1,
+      "restartTimeZone": "Europe/Zurich",
+      "mods": [
+        {
+          "workshopId": "2828486817",
+          "name": "DayZ-Expansion-Quests"
+        },
+        {
+          "workshopId": "2878980498",
+          "name": "RaG_BaseItems"
+        },
+        {
+          "workshopId": "2792982069",
+          "name": "DayZ-Expansion-AI"
+        },
+        {
+          "workshopId": "2572328470",
+          "name": "DayZ-Expansion-Market"
+        },
+        {
+          "workshopId": "2291785308",
+          "name": "DayZ-Expansion-Core"
+        },
+        {
+          "workshopId": "2276010135",
+          "name": "DayZ Editor Loader"
+        },
+        {
+          "workshopId": "3556131153",
+          "name": "RaG_Core"
+        },
+        {
+          "workshopId": "3816371550",
+          "name": "Iconic Server Pack Assets"
+        },
+        {
+          "workshopId": "3605225106",
+          "name": "Iconic Server Pack Equipment"
+        },
+        {
+          "workshopId": "3605259764",
+          "name": "Iconic Server Pack Customs"
+        },
+        {
+          "workshopId": "3434614117",
+          "name": "Iconic Server Pack Essentials"
+        },
+        {
+          "workshopId": "3047413032",
+          "name": "Iconic Server Pack Vehicles"
+        },
+        {
+          "workshopId": "3309721541",
+          "name": "Iconic Server Pack Entities"
+        },
+        {
+          "workshopId": "3077736647",
+          "name": "Iconic Server Pack Core"
+        },
+        {
+          "workshopId": "3047438506",
+          "name": "Iconic Server Pack Systems"
+        },
+        {
+          "workshopId": "3387855369",
+          "name": "4KBOSSKVehiclePackage"
+        },
+        {
+          "workshopId": "3413364741",
+          "name": "AJs Creatures V2"
+        },
+        {
+          "workshopId": "2931560672",
+          "name": "Forward Operator Gear"
+        },
+        {
+          "workshopId": "2663169692",
+          "name": "MMG - Mightys Military Gear"
+        },
+        {
+          "workshopId": "3491661516",
+          "name": "DudeWheresMyCar"
+        },
+        {
+          "workshopId": "3707015798",
+          "name": "Car Camera Controls by DelaDuck"
+        },
+        {
+          "workshopId": "3484152258",
+          "name": "BS Field of View - FOV"
+        },
+        {
+          "workshopId": "1565871491",
+          "name": "BuilderItems"
+        },
+        {
+          "workshopId": "2814571904",
+          "name": "AutoRun"
+        },
+        {
+          "workshopId": "3425994533",
+          "name": "VehicleRecovery"
+        },
+        {
+          "workshopId": "2745352757",
+          "name": "LoftDModGR Clothes Pack"
+        },
+        {
+          "workshopId": "3354931239",
+          "name": "Alevaric's Clothing Overhaul"
+        },
+        {
+          "workshopId": "3167286994",
+          "name": "AutolockVehicles"
+        },
+        {
+          "workshopId": "2851058261",
+          "name": "CJ187-PokemonCards"
+        },
+        {
+          "workshopId": "2393499239",
+          "name": "Terrain Islands"
+        },
+        {
+          "workshopId": "2692979668",
+          "name": "RedFalcon Flight System Heliz"
+        },
+        {
+          "workshopId": "2931436407",
+          "name": "Drippy Sneakers"
+        },
+        {
+          "workshopId": "2545327648",
+          "name": "Dabs Framework"
+        },
+        {
+          "workshopId": "1559212036",
+          "name": "Community Framework"
         }
       ],
       "modsFromQuery": true
@@ -622,7 +622,7 @@
       "gamePort": 2302,
       "queryPort": 2303,
       "restartIntervalHours": 3,
-      "restartAnchorHour": 2,
+      "restartAnchorHour": 1,
       "restartTimeZone": "Europe/Zurich",
       "mods": [
         {
@@ -771,7 +771,7 @@
       "gamePort": 2402,
       "queryPort": 2403,
       "restartIntervalHours": 3,
-      "restartAnchorHour": 2,
+      "restartAnchorHour": 1,
       "restartTimeZone": "Europe/Zurich",
       "mods": [
         {
@@ -916,6 +916,12 @@
   ],
   "news": [
     {
+      "id": "launcher-130",
+      "date": "2026-11-26",
+      "title": "Launcher v1.3.0 - graphics crash warning",
+      "body": "DayZ 1.30 crashes for many players on High or Extreme graphics. The launcher now warns you before you join if your settings are above Medium and can switch you to Medium with one click (only the settings above Medium are lowered, and your old settings can be restored in Settings). While your settings are above Medium, a blinking warning icon shows on the SETTINGS tab - click it to see the warning. Settings also has a new GRAPHICS section with the quality preset and Fullscreen/Windowed. NVIDIA players: turn Smooth Motion off in the NVIDIA app."
+    },
+    {
       "id": "launcher-121",
       "date": "2026-10-30",
       "title": "Halloween Event & Badlands Launch!",
@@ -998,6 +1004,12 @@
       "url": null
     }
   ],
+  "graphicsAdvisory": {
+    "enabled": true,
+    "id": "dayz-130-high-gfx",
+    "title": "DayZ 1.30 can crash on High or Extreme graphics",
+    "message": "Many players crash to the desktop with graphics above Medium. Until Bohemia fixes it, play on Medium. On an NVIDIA card, also turn Smooth Motion off in the NVIDIA app."
+  },
   "wow": {
     "name": "Iconic WoW - Wrath of the Lich King",
     "clientVersion": "3.3.5a",

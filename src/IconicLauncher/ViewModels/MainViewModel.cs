@@ -286,6 +286,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             await LoadConfigAsync();
             CheckForUpdate();
             LocateSteam();
+            if (Environment.GetEnvironmentVariable("ICONIC_LAUNCHER_START_PAGE") is { Length: > 0 } startPage)
+            {
+                if (startPage == "GFXWARN")
+                {
+                    _ = CheckGraphicsBeforeLaunchAsync();
+                }
+                else
+                {
+                    Navigate(startPage);
+                }
+            }
             _ = Profile.LoadAsync();
             _ = LoadHeroVideoAsync();
             InitializeRpc();
@@ -340,6 +351,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Admin?.SetTemplate(config);
         Wow.ApplyConfig(config.Wow);
         WowAddons.ApplyConfig(config.Wow);
+        SettingsPage.RefreshGraphics();
     }
 
     public void MoveServerCard(ServerCardViewModel card, int delta)
@@ -680,7 +692,73 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void CloseDialog()
     {
+        if (Dialog is GraphicsWarningDialogViewModel graphics)
+        {
+            graphics.Complete(GraphicsChoice.Cancel);
+        }
         Dialog = null;
+    }
+
+    public DayZVideoSettingsService Video { get; } = new(
+        Environment.GetEnvironmentVariable("ICONIC_LAUNCHER_DEV_DIR") is { Length: > 0 } devDir ? System.IO.Path.Combine(devDir, "DayZDocs") : null);
+
+    public GraphicsAdvisory Advisory => _config?.GraphicsAdvisory ?? new GraphicsAdvisory();
+
+    public async Task<bool> CheckGraphicsBeforeLaunchAsync()
+    {
+        var advisory = Advisory;
+        if (!advisory.Enabled || SettingsService.Settings.GraphicsAdvisoryMutedId == advisory.Id)
+        {
+            return true;
+        }
+        DayZVideoState? state;
+        try
+        {
+            state = Video.Read();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Reading DayZ graphics settings failed");
+            return true;
+        }
+        if (state is not { IsAboveMedium: true } || DayZVideoSettingsService.IsDayZRunning())
+        {
+            return true;
+        }
+        var dialog = new GraphicsWarningDialogViewModel(this, state, advisory);
+        Dialog = dialog;
+        var choice = await dialog.Result;
+        if (Dialog == dialog)
+        {
+            Dialog = null;
+        }
+        if (dialog.DontShowAgain && choice != GraphicsChoice.Cancel)
+        {
+            SettingsService.Settings.GraphicsAdvisoryMutedId = advisory.Id;
+            SaveSettingsSafe("Saving settings failed");
+            SettingsPage.RefreshGraphics();
+        }
+        switch (choice)
+        {
+            case GraphicsChoice.ApplyMedium:
+                try
+                {
+                    Video.CapAt(VideoPreset.Medium, state);
+                    Log.Information("Graphics capped at Medium before launch (was {Preset})", state.PresetLabel);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Capping graphics at Medium failed");
+                    StatusBanner = "Could not change the graphics settings: " + ex.Message;
+                    return false;
+                }
+                SettingsPage.RefreshGraphics();
+                return true;
+            case GraphicsChoice.PlayAnyway:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /// <summary>
@@ -695,6 +773,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             Wow.ApplyConfig(config.Wow);
             WowAddons.ApplyConfig(config.Wow);
         }
+        SettingsPage.RefreshGraphics();
 
         // Home.Servers is deliberately NOT rebuilt here. Recreating the cards would throw
         // away ServerCardViewModels that may be mid-verification or mid-launch, which is the
@@ -918,6 +997,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
                 break;
             case "SETTINGS":
                 CurrentViewModel = SettingsPage;
+                SettingsPage.RefreshGraphics();
                 break;
             case "ADMIN":
                 if (Admin != null) CurrentViewModel = Admin;

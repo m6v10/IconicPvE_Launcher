@@ -508,6 +508,10 @@ public sealed partial class ServerCardViewModel : ObservableObject
             StatusText = "DayZ installation not found";
             return;
         }
+        if (!await _owner.CheckGraphicsBeforeLaunchAsync())
+        {
+            return;
+        }
         var previous = State;
         State = CardState.Launching;
         LaunchResult result;

@@ -37,6 +37,9 @@
         <DataTemplate DataType="{x:Type vm:EditServersDialogViewModel}">
             <views:EditServersDialog/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GraphicsWarningDialogViewModel}">
+            <views:GraphicsWarningDialog/>
+        </DataTemplate>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Escape" Command="{Binding CloseDialogCommand}"/>
@@ -114,6 +117,35 @@
                                  IsChecked="{Binding IsSettingsChecked, Mode=OneWay}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="SETTINGS"/>
+                            <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{StaticResource StatusAmberBrush}"
+                                       Margin="8,0,0,0" VerticalAlignment="Center"
+                                       ToolTip="Your DayZ graphics are above Medium. DayZ 1.30 can crash on High or Extreme - click to see.">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding SettingsPage.GraphicsAlert}" Value="True"/>
+                                                    <Condition Binding="{Binding IsDayZActive}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <MultiDataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="GraphicsAlertBlink">
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.15"
+                                                                             Duration="0:0:0.6" AutoReverse="True" RepeatBehavior="Forever"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </MultiDataTrigger.EnterActions>
+                                                <MultiDataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="GraphicsAlertBlink"/>
+                                                </MultiDataTrigger.ExitActions>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource StatusRedBrush}"
                                        Margin="8,0,0,0" VerticalAlignment="Center"
                                        Visibility="{Binding SettingsPage.IsProfileNameSuspicious, Converter={StaticResource BoolToVis}}"/>

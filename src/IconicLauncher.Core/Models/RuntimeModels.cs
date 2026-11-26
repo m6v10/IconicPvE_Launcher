@@ -28,6 +28,7 @@ public sealed class LauncherSettings
     public bool LaunchNoPause { get; set; } = true;
     public bool LaunchWindowed { get; set; }
     public bool LaunchDoLogs { get; set; }
+    public string? GraphicsAdvisoryMutedId { get; set; }
     public string? LastSelectedServerId { get; set; }
     public double WindowWidth { get; set; } = 1100;
     public double WindowHeight { get; set; } = 700;

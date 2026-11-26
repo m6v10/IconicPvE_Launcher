@@ -12,6 +12,15 @@ public sealed class LauncherConfig
     public WowConfig? Wow { get; set; }
     public string? DayZHeroVideoUrl { get; set; }
     public string? HubBaseUrl { get; set; }
+    public GraphicsAdvisory GraphicsAdvisory { get; set; } = new();
+}
+
+public sealed class GraphicsAdvisory
+{
+    public bool Enabled { get; set; } = true;
+    public string Id { get; set; } = "dayz-130-high-gfx";
+    public string Title { get; set; } = "DayZ 1.30 can crash on High or Extreme graphics";
+    public string Message { get; set; } = "Many players crash to the desktop with graphics above Medium. Until Bohemia fixes it, play on Medium. On an NVIDIA card, also turn Smooth Motion off in the NVIDIA app.";
 }
 
 public sealed class LauncherInfo

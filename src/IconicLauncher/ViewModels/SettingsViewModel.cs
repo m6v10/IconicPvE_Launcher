@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IconicLauncher.Core.Models;
 using IconicLauncher.Core.Services;
 using IconicLauncher.Core.Utils;
 using Serilog;
@@ -157,7 +158,150 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    public bool IsProfileNameSurvivor => ProfileName.Trim().Equals("Survivor", StringComparison.OrdinalIgnoreCase);
+    [ObservableProperty]
+    private string graphicsPreset = "";
+
+    [ObservableProperty]
+    private string? graphicsStatusText;
+
+    [ObservableProperty]
+    private string? graphicsAboveText;
+
+    [ObservableProperty]
+    private bool graphicsAvailable;
+
+    [ObservableProperty]
+    private bool graphicsRisky;
+
+    [ObservableProperty]
+    private bool graphicsAlert;
+
+    [ObservableProperty]
+    private bool hasGraphicsBackup;
+
+    [ObservableProperty]
+    private string? graphicsSaveStatus;
+
+    [ObservableProperty]
+    private string displayMode = "fullscreen";
+
+    [ObservableProperty]
+    private bool advisoryEnabled;
+
+    [ObservableProperty]
+    private string? advisoryTitle;
+
+    [ObservableProperty]
+    private string? advisoryMessage;
+
+    public void RefreshGraphics()
+    {
+        var advisory = _owner.Advisory;
+        AdvisoryEnabled = advisory.Enabled;
+        AdvisoryTitle = advisory.Title;
+        AdvisoryMessage = advisory.Message;
+        DayZVideoState? state = null;
+        try
+        {
+            state = _owner.Video.Read();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Reading DayZ graphics settings failed");
+        }
+        GraphicsAvailable = state is not null;
+        if (state is null)
+        {
+            GraphicsPreset = "";
+            GraphicsStatusText = "No DayZ settings found yet. Start DayZ once, then come back here.";
+            GraphicsAboveText = null;
+            GraphicsRisky = false;
+            HasGraphicsBackup = false;
+        }
+        else
+        {
+            GraphicsPreset = state.Preset?.ToString().ToLowerInvariant() ?? "custom";
+            GraphicsStatusText = "Current: " + state.PresetLabel.ToUpperInvariant();
+            GraphicsRisky = state.IsAboveMedium;
+            GraphicsAboveText = state.IsAboveMedium
+                ? "Above Medium: " + string.Join(", ", state.AboveMedium.Select(k => k.Label))
+                : null;
+            HasGraphicsBackup = state.HasBackup;
+        }
+        GraphicsAlert = advisory.Enabled
+            && _owner.SettingsService.Settings.GraphicsAdvisoryMutedId != advisory.Id
+            && state is { IsAboveMedium: true };
+        DisplayMode = state?.Windowed == true || _owner.SettingsService.Settings.LaunchWindowed ? "windowed" : "fullscreen";
+        OnPropertyChanged(nameof(GraphicsPreset));
+        OnPropertyChanged(nameof(DisplayMode));
+    }
+
+    [RelayCommand]
+    private void SetGraphicsPreset(string? value)
+    {
+        if (!Enum.TryParse<VideoPreset>(value, true, out var preset))
+        {
+            return;
+        }
+        RunGraphicsChange(() => _owner.Video.ApplyPreset(preset), $"Set to {preset}. DayZ uses it the next time it starts.");
+    }
+
+    [RelayCommand]
+    private void CapGraphicsAtMedium()
+    {
+        RunGraphicsChange(() =>
+        {
+            var state = _owner.Video.Read() ?? throw new FileNotFoundException("DayZ settings not found. Start DayZ once, then try again.");
+            _owner.Video.CapAt(VideoPreset.Medium, state);
+        }, "Everything above Medium was lowered to Medium.");
+    }
+
+    [RelayCommand]
+    private void RestoreGraphics()
+    {
+        RunGraphicsChange(() => _owner.Video.RestoreBackup(), "Your previous DayZ settings are back.");
+    }
+
+    [RelayCommand]
+    private void SetDisplayMode(string? value)
+    {
+        var windowed = string.Equals(value, "windowed", StringComparison.OrdinalIgnoreCase);
+        RunGraphicsChange(() =>
+        {
+            if (_owner.Video.Read() is not null)
+            {
+                _owner.Video.SetWindowed(windowed);
+            }
+            var s = _owner.SettingsService.Settings;
+            s.LaunchWindowed = windowed;
+            LaunchWindowed = windowed;
+            _owner.SettingsService.Save();
+        }, windowed ? "DayZ starts in a window." : "DayZ starts in fullscreen.");
+    }
+
+    private void RunGraphicsChange(Action change, string success)
+    {
+        if (DayZVideoSettingsService.IsDayZRunning())
+        {
+            GraphicsSaveStatus = "Close DayZ first - it overwrites these settings when it exits.";
+            RefreshGraphics();
+            return;
+        }
+        try
+        {
+            change();
+            GraphicsSaveStatus = success;
+            Log.Information("DayZ graphics change: {Result}", success);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Changing DayZ graphics settings failed");
+            GraphicsSaveStatus = "Failed: " + ex.Message;
+        }
+        RefreshGraphics();
+    }
+
+    public bool IsProfileNameSurvivor =>ProfileName.Trim().Equals("Survivor", StringComparison.OrdinalIgnoreCase);
 
     public bool HasDuplicateSuffix => DuplicateSuffixRegex.IsMatch(ProfileName);
 

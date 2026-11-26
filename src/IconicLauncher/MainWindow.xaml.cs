@@ -10,6 +10,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         StateChanged += (_, _) => SyncVideo();
+        Activated += (_, _) => (DataContext as ViewModels.MainViewModel)?.SettingsPage.RefreshGraphics();
         DependencyPropertyDescriptor.FromProperty(MediaElement.SourceProperty, typeof(MediaElement))
             .AddValueChanged(DayZVideo, (_, _) => SyncVideo());
     }

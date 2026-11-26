@@ -22,6 +22,71 @@
             <TextBlock Text="DAYZ" Style="{StaticResource SectionLabel}" Margin="0,26,0,6" Foreground="{DynamicResource AccentBrush}"/>
             <CheckBox Content="Discord Rich Presence (shows your DayZ server in Discord)" Margin="0,6,0,0" IsChecked="{Binding DiscordRpcEnabled}"/>
             <CheckBox Content="Update outdated mods automatically in the background (while DayZ is closed)" Margin="0,10,0,0" IsChecked="{Binding AutoUpdateMods}"/>
+            <TextBlock Text="GRAPHICS" Style="{StaticResource SectionLabel}" Margin="0,18,0,6"/>
+            <Border BorderBrush="{StaticResource StatusAmberBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,10"
+                    Background="{StaticResource RowAlertBrush}"
+                    Visibility="{Binding AdvisoryEnabled, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding AdvisoryTitle}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource AlertTextBrush}" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding AdvisoryMessage}" FontSize="12" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="{Binding GraphicsStatusText}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{StaticResource StatusGreenBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding GraphicsRisky}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource AlertTextBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding GraphicsAvailable}" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource StatusGrayBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Text="{Binding GraphicsAboveText}" FontSize="12" TextWrapping="Wrap" Margin="0,3,0,0" Foreground="{StaticResource MutedBrush}"
+                       Visibility="{Binding GraphicsAboveText, Converter={StaticResource NullToVis}}"/>
+            <StackPanel IsEnabled="{Binding GraphicsAvailable}">
+                <TextBlock Text="QUALITY PRESET (SAME AS IN-GAME OVERALL QUALITY)" Style="{StaticResource SectionLabel}" Margin="0,12,0,6"/>
+                <WrapPanel>
+                    <RadioButton Content="Poor" GroupName="GfxPreset" Margin="0,0,18,6"
+                                 IsChecked="{Binding GraphicsPreset, Converter={StaticResource StringEquals}, ConverterParameter=poor, Mode=OneWay}"
+                                 Command="{Binding SetGraphicsPresetCommand}" CommandParameter="poor"/>
+                    <RadioButton Content="Low" GroupName="GfxPreset" Margin="0,0,18,6"
+                                 IsChecked="{Binding GraphicsPreset, Converter={StaticResource StringEquals}, ConverterParameter=low, Mode=OneWay}"
+                                 Command="{Binding SetGraphicsPresetCommand}" CommandParameter="low"/>
+                    <RadioButton Content="Medium (recommended)" GroupName="GfxPreset" Margin="0,0,18,6"
+                                 IsChecked="{Binding GraphicsPreset, Converter={StaticResource StringEquals}, ConverterParameter=medium, Mode=OneWay}"
+                                 Command="{Binding SetGraphicsPresetCommand}" CommandParameter="medium"/>
+                    <RadioButton Content="High" GroupName="GfxPreset" Margin="0,0,18,6"
+                                 IsChecked="{Binding GraphicsPreset, Converter={StaticResource StringEquals}, ConverterParameter=high, Mode=OneWay}"
+                                 Command="{Binding SetGraphicsPresetCommand}" CommandParameter="high"/>
+                    <RadioButton Content="Extreme" GroupName="GfxPreset" Margin="0,0,18,6"
+                                 IsChecked="{Binding GraphicsPreset, Converter={StaticResource StringEquals}, ConverterParameter=extreme, Mode=OneWay}"
+                                 Command="{Binding SetGraphicsPresetCommand}" CommandParameter="extreme"/>
+                </WrapPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Button Content="LOWER ONLY WHAT IS ABOVE MEDIUM" MinWidth="200" FontSize="10" Padding="10,5" Command="{Binding CapGraphicsAtMediumCommand}"
+                            Visibility="{Binding GraphicsRisky, Converter={StaticResource BoolToVis}}" Margin="0,0,10,0"/>
+                    <Button Content="RESTORE MY OLD SETTINGS" MinWidth="160" FontSize="10" Padding="10,5" Command="{Binding RestoreGraphicsCommand}"
+                            Visibility="{Binding HasGraphicsBackup, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Text="DISPLAY MODE" Style="{StaticResource SectionLabel}" Margin="0,14,0,6"/>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Content="Fullscreen" GroupName="DisplayMode"
+                             IsChecked="{Binding DisplayMode, Converter={StaticResource StringEquals}, ConverterParameter=fullscreen, Mode=OneWay}"
+                             Command="{Binding SetDisplayModeCommand}" CommandParameter="fullscreen"/>
+                <RadioButton Content="Windowed" GroupName="DisplayMode" Margin="18,0,0,0"
+                             IsChecked="{Binding DisplayMode, Converter={StaticResource StringEquals}, ConverterParameter=windowed, Mode=OneWay}"
+                             Command="{Binding SetDisplayModeCommand}" CommandParameter="windowed"/>
+            </StackPanel>
+            <TextBlock Text="{Binding GraphicsSaveStatus}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{StaticResource StatusGreenBrush}"
+                       Visibility="{Binding GraphicsSaveStatus, Converter={StaticResource NullToVis}}"/>
+            <TextBlock Text="These change the same files as DayZ's own video options. DayZ must be closed. The launcher keeps a copy of your old settings the first time it changes them."
+                       FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{StaticResource StatusGrayBrush}"/>
             <TextBlock Text="PROFILE NAME" Style="{StaticResource SectionLabel}" Margin="0,14,0,6"/>
             <TextBox Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}">
                 <TextBox.Style>
@@ -85,7 +150,6 @@
             <TextBlock Text="LAUNCH OPTIONS" Style="{StaticResource SectionLabel}" Margin="0,18,0,6"/>
             <CheckBox Content="No splash screen (-noSplash)" IsChecked="{Binding LaunchNoSplash}"/>
             <CheckBox Content="Keep running when tabbed out (-noPause)" Margin="0,10,0,0" IsChecked="{Binding LaunchNoPause}"/>
-            <CheckBox Content="Windowed mode (-window)" Margin="0,10,0,0" IsChecked="{Binding LaunchWindowed}"/>
             <CheckBox Content="Extended game logs (-doLogs)" Margin="0,10,0,0" IsChecked="{Binding LaunchDoLogs}"/>
             <CheckBox Content="Auto-connect to the server on launch" Margin="0,10,0,0" IsChecked="{Binding AutoConnect}"/>
             <TextBlock Text="EXTRA LAUNCH PARAMETERS (APPENDED ON TOP OF THE OPTIONS ABOVE)" Style="{StaticResource SectionLabel}" Margin="0,18,0,6"/>

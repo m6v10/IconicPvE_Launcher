@@ -3,6 +3,7 @@ using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconicLauncher.Core.Models;
+using IconicLauncher.Core.Services;
 using IconicLauncher.Core.Utils;
 using Serilog;
 
@@ -48,6 +49,9 @@ public sealed partial class AddServerDialogViewModel : ObservableObject
 
     [ObservableProperty]
     private bool probeFailed;
+
+    [ObservableProperty]
+    private bool experimental;
 
     partial void OnAddressChanged(string value)
     {
@@ -149,8 +153,18 @@ public sealed partial class AddServerDialogViewModel : ObservableObject
             }
             var mods = await _owner.ServerModQuery.QueryModListAsync(ip, queryPort);
             var modText = mods is null ? "mod list unavailable" : $"{mods.Count} mods";
+            var versionText = "";
+            if (GameVersion.MajorMinor(status.Version) is { } version)
+            {
+                var exp = GameBranch.MatchesExperimentalOnly(_owner.Env, status.Version);
+                if (exp)
+                {
+                    Experimental = true;
+                }
+                versionText = exp ? $" - DayZ {version} (Experimental)" : $" - DayZ {version}";
+            }
             ProbeOk = true;
-            ProbeText = $"{status.Name} - {status.Players}/{status.MaxPlayers} players - {status.PingMs} ms - {modText}";
+            ProbeText = $"{status.Name} - {status.Players}/{status.MaxPlayers} players - {status.PingMs} ms - {modText}{versionText}";
         }
         catch (Exception ex)
         {
@@ -197,6 +211,7 @@ public sealed partial class AddServerDialogViewModel : ObservableObject
                 // Player-added servers always take their mod list from the server itself -
                 // there is no config to carry one, and it stays right when the server changes.
                 ModsFromQuery = true,
+                Experimental = Experimental,
                 RestartIntervalHours = 0,
                 Mods = new List<ModEntry>()
             };

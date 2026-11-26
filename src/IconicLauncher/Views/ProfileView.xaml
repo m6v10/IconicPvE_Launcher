@@ -1,0 +1,241 @@
+<UserControl x:Class="IconicLauncher.Views.ProfileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <DataTemplate x:Key="SectionCard">
+            <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
+                    <ItemsControl ItemsSource="{Binding Rows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#14FFFFFF" BorderThickness="0,0,0,1" Padding="0,6">
+                                    <Grid>
+                                        <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                        <TextBlock Text="{Binding Value}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"
+                                                   HorizontalAlignment="Right" ToolTip="{Binding ToolTip}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Margin="40,26,40,22" MaxWidth="1380">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="PLAYER PROFILE" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding PlayerName}" Style="{StaticResource DisplayText}" FontSize="42" Margin="0,-4,0,0"
+                               Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"/>
+                    <Border Style="{StaticResource Badge}" Margin="14,0,0,4" VerticalAlignment="Bottom" Padding="8,2"
+                            Visibility="{Binding GroupTag, Converter={StaticResource NullToVis}}">
+                        <TextBlock Text="{Binding GroupTag}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentSoftBrush}"/>
+                    </Border>
+                    <TextBlock Text="{Binding TitleText}" FontSize="13" FontStyle="Italic" Foreground="{DynamicResource AccentSoftBrush}"
+                               Margin="12,0,0,6" VerticalAlignment="Bottom" Visibility="{Binding TitleText, Converter={StaticResource NullToVis}}"/>
+                </StackPanel>
+                <TextBlock Text="{Binding SubtitleText}" FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0"
+                           Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,6,0,0">
+                <Button Style="{StaticResource ChipButton}" Padding="12,6" ToolTip="Copy your SteamID"
+                        Command="{Binding CopySteamIdCommand}" Visibility="{Binding SteamIdText, Converter={StaticResource NullToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="STEAM" FontSize="10" FontWeight="Bold" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SteamIdText}" FontSize="11" Foreground="{StaticResource TextBrush}" Margin="8,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72C;" Width="32" Height="30" Margin="8,0,0,0"
+                        ToolTip="Refresh your stats" Command="{Binding RefreshCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Tabs}" Margin="0,18,0,0"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Style="{StaticResource TabButton}" Content="{Binding Label}"
+                            Command="{Binding DataContext.SelectTabCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Rectangle Grid.Row="1" Height="1" VerticalAlignment="Bottom" Fill="{DynamicResource HairlineBrush}"
+                   Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}"/>
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Tiles}" Margin="0,18,0,0"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,12,0" ToolTip="{Binding ToolTip}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Label}" Style="{StaticResource Eyebrow}" FontSize="12"/>
+                            <TextBlock Text="{Binding Value}" Style="{StaticResource DisplayText}" FontSize="36" Margin="0,-2,0,-4"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Sub}" FontSize="11" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <ScrollViewer Grid.Row="3" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+            <Grid Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.15*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,12,0">
+                    <ContentControl Content="{Binding Sections[0]}" ContentTemplate="{StaticResource SectionCard}"/>
+                    <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,0,14"
+                            Visibility="{Binding ShowBossKills, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding BossKillsTitle}" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <ItemsControl ItemsSource="{Binding BossKills}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,8" ToolTip="{Binding Group}">
+                                            <Grid>
+                                                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,40,0"/>
+                                                <TextBlock Text="{Binding Value}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource HotBrush}" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                            <Grid Height="4" Margin="0,4,0,0">
+                                                <Rectangle Fill="{StaticResource SegmentTrackBrush}" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" RenderTransformOrigin="0,0.5">
+                                                    <Rectangle.RenderTransform>
+                                                        <ScaleTransform ScaleX="{Binding Fraction}"/>
+                                                    </Rectangle.RenderTransform>
+                                                </Rectangle>
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <ContentControl Content="{Binding Sections[1]}" ContentTemplate="{StaticResource SectionCard}"/>
+                    <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,0,14"
+                            Visibility="{Binding ShowProfessions, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="PROFESSIONS" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
+                            <ItemsControl ItemsSource="{Binding Professions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#14FFFFFF" BorderThickness="0,0,0,1" Padding="0,6">
+                                            <Grid>
+                                                <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding Value}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
+                                                    <TextBlock Text="{Binding ToolTip}" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="8,0,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,0,14"
+                            Visibility="{Binding ShowAchievements, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="ACHIEVEMENTS" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}"/>
+                                <TextBlock Text="{Binding AchievementsText}" FontSize="11" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Grid Height="4" Margin="0,0,0,12">
+                                <Rectangle Fill="{StaticResource SegmentTrackBrush}" RadiusX="2" RadiusY="2"/>
+                                <Rectangle Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" RenderTransformOrigin="0,0.5">
+                                    <Rectangle.RenderTransform>
+                                        <ScaleTransform ScaleX="{Binding AchievementsFraction}"/>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding Achievements}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1AD4AF37" BorderBrush="#40D4AF37" BorderThickness="1" CornerRadius="5"
+                                                Padding="8,3" Margin="0,0,6,6" ToolTip="{Binding Description}">
+                                            <TextBlock Text="{Binding Title}" FontSize="11" Foreground="{DynamicResource AccentSoftBrush}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource GlassCard}" Padding="16,12" Margin="0,0,0,14"
+                            Visibility="{Binding ShowHistory, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="PAST WIPES" Style="{StaticResource Eyebrow}" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,6"/>
+                            <ItemsControl ItemsSource="{Binding History}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#14FFFFFF" BorderThickness="0,0,0,1" Padding="0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="54"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Era}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentSoftBrush}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Server}" FontSize="12" Foreground="{StaticResource MutedBrush}"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Points}" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Rank}" FontSize="12" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Grid.RowSpan="3" Style="{StaticResource GlassCard}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                MaxWidth="460" Padding="28,24" Visibility="{Binding HasData, Converter={StaticResource InvBoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{Binding EmptyTitle}" Style="{StaticResource DisplayText}" FontSize="26" TextWrapping="Wrap" TextAlignment="Center"/>
+                <TextBlock Text="{Binding EmptyText}" FontSize="12" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,0"/>
+                <Button Content="REFRESH" HorizontalAlignment="Center" Margin="0,16,0,0" Padding="18,7" Command="{Binding RefreshCommand}"
+                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBool}}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

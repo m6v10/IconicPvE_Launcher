@@ -14,6 +14,7 @@ public sealed partial class ModsViewModel : ObservableObject
 {
     private readonly MainViewModel _owner;
     private readonly List<ServerCardViewModel> _cards = new();
+    private readonly HashSet<string> _autoUpdateAttempts = new(StringComparer.OrdinalIgnoreCase);
 
     public ObservableCollection<ModRowViewModel> Rows { get; } = new();
     public ObservableCollection<ModRowViewModel> NeedsUpdateRows { get; } = new();
@@ -347,6 +348,42 @@ public sealed partial class ModsViewModel : ObservableObject
         }
     }
 
+    internal async Task AutoUpdateAsync()
+    {
+        if (IsBusy || HasBusyRows || Core.Utils.DayZProcess.IsRunning()) return;
+        if (_owner.Home.Servers.Any(c => c.State is CardState.Downloading or CardState.Launching or CardState.Running)) return;
+        var env = _owner.Env;
+        if (env is not { DayZFound: true }) return;
+        var pending = Rows
+            .Where(r => r.State == ModState.Outdated && _autoUpdateAttempts.Add(r.WorkshopId + "|" + r.Result.RemoteManifest))
+            .Select(r => r.Result)
+            .ToList();
+        if (pending.Count == 0) return;
+        Log.Information("Auto-updating {Count} outdated mod(s)", pending.Count);
+        IsBusy = true;
+        IsUpdatingAll = true;
+        ProgressPercent = 0;
+        StatusText = $"Updating {pending.Count} mod(s) automatically...";
+        try
+        {
+            var progress = new Progress<WorkshopProgress>(OnBulkProgress);
+            var ok = await _owner.Updater.EnsureModsReadyAsync(pending, env, progress);
+            await RecheckAllAsync();
+            StatusText = ok ? "Mods updated automatically" : "Some mods could not be updated automatically - press UPDATE ALL";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Automatic mod update failed");
+            StatusText = "Automatic mod update failed: " + ex.Message;
+        }
+        finally
+        {
+            IsUpdatingAll = false;
+            IsBusy = false;
+            RefreshRows();
+        }
+    }
+
     private async Task RecheckAllAsync()
     {
         foreach (var card in _cards.ToList())
@@ -620,9 +657,15 @@ public sealed partial class ModRowViewModel : ObservableObject
     private bool CanOperate => !IsBusy && !_owner.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanOperate))]
-    private Task UpdateModAsync()
+    private async Task UpdateModAsync()
     {
-        return _owner.RunUpdateAsync(this);
+        if (IsDamaged)
+        {
+            if (Confirm($"\"{Name}\" has damaged files ({IndicatorText}). Delete them and reinstall it fresh from the workshop?") != MessageBoxResult.Yes) return;
+            await _owner.RunRebuildAsync(this);
+            return;
+        }
+        await _owner.RunUpdateAsync(this);
     }
 
     [RelayCommand(CanExecute = nameof(CanOperate))]

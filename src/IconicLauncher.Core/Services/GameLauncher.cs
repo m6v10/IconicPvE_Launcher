@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using IconicLauncher.Core.Models;
+using IconicLauncher.Core.Utils;
 using Serilog;
 
 namespace IconicLauncher.Core.Services;
@@ -9,39 +10,38 @@ public sealed class GameLauncher : IGameLauncher
 {
     private const string BePrefix = "0 1 1 -exe DayZ_x64.exe ";
 
-    public LaunchResult Launch(ServerEntry server, IReadOnlyList<ModVerificationResult> mods, SteamEnvironment env, LauncherSettings settings, string? password = null)
+    public LaunchResult Launch(ServerEntry server, IReadOnlyList<ModVerificationResult> mods, SteamEnvironment env, LauncherSettings settings, string? password = null, bool experimental = false)
     {
-        if (env.DayZDir == null)
-            return new LaunchResult { Started = false, Error = "DayZ installation not found" };
+        var gameDir = experimental ? env.DayZExpDir : env.DayZDir;
+        if (gameDir == null)
+            return new LaunchResult
+            {
+                Started = false,
+                Error = experimental ? "DayZ Experimental not found - install it in Steam or set its folder in Settings" : "DayZ installation not found"
+            };
         var notReady = mods.Where(m => m.State != ModState.Ready || m.InstallPath == null).ToList();
         if (notReady.Count > 0)
             return new LaunchResult { Started = false, Error = "Mods not ready: " + string.Join(", ", notReady.Select(m => m.Mod.Name)) };
 
         var args = BuildArguments(server, mods.Select(m => m.InstallPath!), settings, password);
-        var exe = Path.Combine(env.DayZDir, "DayZ_BE.exe");
+        var exe = Path.Combine(gameDir, "DayZ_BE.exe");
         if (!File.Exists(exe))
         {
             Log.Warning("DayZ_BE.exe not found at {Path}, falling back to DayZ_x64.exe without BattlEye stub", exe);
-            exe = Path.Combine(env.DayZDir, "DayZ_x64.exe");
+            exe = Path.Combine(gameDir, "DayZ_x64.exe");
             if (!File.Exists(exe))
-                return new LaunchResult { Started = false, Error = "Neither DayZ_BE.exe nor DayZ_x64.exe found in " + env.DayZDir };
+                return new LaunchResult { Started = false, Error = "Neither DayZ_BE.exe nor DayZ_x64.exe found in " + gameDir };
             if (args.StartsWith(BePrefix, StringComparison.Ordinal))
                 args = args[BePrefix.Length..];
         }
 
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = exe,
-                Arguments = args,
-                WorkingDirectory = env.DayZDir,
-                UseShellExecute = false
-            };
+            var startInfo = BuildStartInfo(exe, args, gameDir, experimental);
             var process = Process.Start(startInfo);
             if (process == null)
                 return new LaunchResult { Started = false, Error = "Process failed to start" };
-            Log.Information("Launched {Exe} pid {Pid} for server {Server}", exe, process.Id, server.Name);
+            Log.Information("Launched {Exe} pid {Pid} for server {Server}{Branch}", exe, process.Id, server.Name, experimental ? " (experimental)" : "");
             return new LaunchResult { Started = true, ProcessId = process.Id };
         }
         catch (Exception ex)
@@ -49,6 +49,21 @@ public sealed class GameLauncher : IGameLauncher
             Log.Error(ex, "Failed to launch {Exe}", exe);
             return new LaunchResult { Started = false, Error = ex.Message };
         }
+    }
+
+    public static ProcessStartInfo BuildStartInfo(string exe, string args, string gameDir, bool experimental)
+    {
+        var appId = experimental ? LauncherConstants.DayZExpAppId : LauncherConstants.DayZAppId;
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = exe,
+            Arguments = args,
+            WorkingDirectory = gameDir,
+            UseShellExecute = false
+        };
+        startInfo.Environment["SteamAppId"] = appId;
+        startInfo.Environment["SteamGameId"] = appId;
+        return startInfo;
     }
 
     public static string BuildArguments(ServerEntry server, IEnumerable<string> modPaths, LauncherSettings settings, string? password = null)

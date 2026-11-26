@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconicLauncher.Core.Models;
 using IconicLauncher.Core.Services;
+using IconicLauncher.Core.Utils;
 using IconicLauncher.Services;
 using Serilog;
 
@@ -37,6 +38,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     internal SteamEnvironment? Env { get; private set; }
 
     public HomeViewModel Home { get; }
+    public ProfileViewModel Profile { get; }
     public ModsViewModel Mods { get; }
     public SettingsViewModel SettingsPage { get; }
     public AdminViewModel? Admin { get; }
@@ -95,9 +97,20 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     partial void OnActiveGameChanged(string value)
     {
         GameTheme.Apply(IsWowActive);
+        OnPropertyChanged(nameof(ShowDayZBackdrop));
     }
 
     public bool IsHomeChecked => CurrentViewModel is HomeViewModel or WowViewModel;
+    public bool IsProfileChecked => CurrentViewModel is ProfileViewModel;
+    public bool ShowDayZBackdrop => IsDayZActive && CurrentViewModel is HomeViewModel or ProfileViewModel;
+    public bool IsProfilePage => CurrentViewModel is ProfileViewModel;
+
+    [ObservableProperty]
+    private Uri? dayZHeroVideoUri;
+
+    public string HubBaseUrl =>
+        Environment.GetEnvironmentVariable("ICONIC_HUB_BASE") is { Length: > 0 } env ? env
+        : string.IsNullOrWhiteSpace(_config?.HubBaseUrl) ? LauncherConstants.DefaultHubBaseUrl : _config!.HubBaseUrl!.Trim();
     public bool IsModsChecked => CurrentViewModel is ModsViewModel;
     public bool IsAddonsChecked => CurrentViewModel is WowAddonsViewModel;
     public bool IsSettingsChecked => CurrentViewModel is SettingsViewModel;
@@ -106,6 +119,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     partial void OnCurrentViewModelChanged(object? value)
     {
         OnPropertyChanged(nameof(IsHomeChecked));
+        OnPropertyChanged(nameof(IsProfileChecked));
+        OnPropertyChanged(nameof(ShowDayZBackdrop));
+        OnPropertyChanged(nameof(IsProfilePage));
         OnPropertyChanged(nameof(IsModsChecked));
         OnPropertyChanged(nameof(IsAddonsChecked));
         OnPropertyChanged(nameof(IsSettingsChecked));
@@ -144,7 +160,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Rpc = rpc;
         IsAdminMode = adminMode;
         VersionLabel = $"v{version}";
-        Home = new HomeViewModel();
+        Profile = new ProfileViewModel(this, new PlayerHubService());
+        Home = new HomeViewModel(this);
         Mods = new ModsViewModel(this);
         SettingsPage = new SettingsViewModel(this);
         Admin = adminMode ? new AdminViewModel(this, adminConfigBuilder, ftpPublishService) : null;
@@ -198,6 +215,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         try
         {
             await Mods.AutoSyncAsync();
+            if (SettingsService.Settings.AutoUpdateMods)
+            {
+                await Mods.AutoUpdateAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -265,6 +286,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             await LoadConfigAsync();
             CheckForUpdate();
             LocateSteam();
+            _ = Profile.LoadAsync();
+            _ = LoadHeroVideoAsync();
             InitializeRpc();
             StartPollLoop();
             _ = Wow.InitializeAsync();
@@ -419,6 +442,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
         settings.CustomServers!.Remove(custom);
         settings.ServerVisibility?.Remove(id);
+        settings.ServerPasswords?.Remove(id);
+        settings.ServerCache?.Remove(id);
+        settings.ServerExperimental?.Remove(id);
         settings.ServerOrder?.RemoveAll(s => string.Equals(s, id, StringComparison.OrdinalIgnoreCase));
         SaveSettingsSafe("Deleting the custom server failed");
         RemoveCard(id);
@@ -519,6 +545,111 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         {
             Log.Warning(ex, "Initializing the new server card failed");
         }
+    }
+
+    internal string? LoadServerPassword(string id)
+    {
+        var map = SettingsService.Settings.ServerPasswords;
+        if (map == null || !map.TryGetValue(id, out var protectedValue) || string.IsNullOrEmpty(protectedValue))
+        {
+            return null;
+        }
+        return DpapiProtector.Unprotect(protectedValue);
+    }
+
+    internal void SaveServerPassword(string id, string? password)
+    {
+        var settings = SettingsService.Settings;
+        settings.ServerPasswords ??= new Dictionary<string, string>();
+        if (string.IsNullOrEmpty(password))
+        {
+            if (!settings.ServerPasswords.Remove(id))
+            {
+                return;
+            }
+        }
+        else
+        {
+            settings.ServerPasswords[id] = DpapiProtector.Protect(password);
+        }
+        SaveSettingsSafe("Saving the server password failed");
+    }
+
+    internal ServerCacheEntry? GetServerCache(string id)
+    {
+        return SettingsService.Settings.ServerCache?.GetValueOrDefault(id);
+    }
+
+    internal (List<ModEntry> Mods, DateTime? Utc)? GetKnownMods(ServerEntry server)
+    {
+        var cache = GetServerCache(server.Id);
+        if (cache?.Mods is { Count: > 0 })
+        {
+            return (cache.Mods, cache.ModsUtc);
+        }
+        if (server.Mods is { Count: > 0 })
+        {
+            return (server.Mods, null);
+        }
+        return null;
+    }
+
+    private ServerCacheEntry GetOrCreateServerCache(string id)
+    {
+        var settings = SettingsService.Settings;
+        settings.ServerCache ??= new Dictionary<string, ServerCacheEntry>();
+        if (!settings.ServerCache.TryGetValue(id, out var entry))
+        {
+            entry = new ServerCacheEntry();
+            settings.ServerCache[id] = entry;
+        }
+        return entry;
+    }
+
+    internal void RememberServerMods(string id, List<ModEntry> mods)
+    {
+        if (mods.Count == 0)
+        {
+            return;
+        }
+        var entry = GetOrCreateServerCache(id);
+        entry.Mods ??= new List<ModEntry>();
+        var same = entry.Mods.Count == mods.Count
+            && entry.Mods.Zip(mods).All(p => p.First.WorkshopId == p.Second.WorkshopId && p.First.Name == p.Second.Name);
+        var fresh = entry.ModsUtc is { } utc && DateTime.UtcNow - utc < TimeSpan.FromHours(1);
+        if (same && fresh)
+        {
+            return;
+        }
+        entry.Mods = mods.Select(m => new ModEntry { WorkshopId = m.WorkshopId, Name = m.Name }).ToList();
+        entry.ModsUtc = DateTime.UtcNow;
+        SaveSettingsSafe("Saving the server mod list failed");
+    }
+
+    internal void RememberServerVersion(string id, string version)
+    {
+        var entry = GetOrCreateServerCache(id);
+        if (entry.Version == version)
+        {
+            return;
+        }
+        entry.Version = version;
+        SaveSettingsSafe("Saving the server version failed");
+    }
+
+    internal bool IsServerExperimental(ServerEntry server)
+    {
+        return FindCard(server.Id)?.IsExperimental
+            ?? GameBranch.UseExperimental(server, SettingsService.Settings, Env, GetServerCache(server.Id)?.Version);
+    }
+
+    internal void SetServerExperimental(string id, bool experimental)
+    {
+        var settings = SettingsService.Settings;
+        settings.ServerExperimental ??= new Dictionary<string, bool>();
+        settings.ServerExperimental[id] = experimental;
+        SaveSettingsSafe("Saving the experimental setting failed");
+        FindCard(id)?.RefreshBranch();
     }
 
     private void SaveSettingsSafe(string failureMessage)
@@ -677,6 +808,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         {
             StatusBanner = "DayZ installation not found - set the paths in Settings";
         }
+        foreach (var card in Home.Servers)
+        {
+            card.RefreshBranch();
+        }
         SettingsPage.RefreshDetected();
         Admin?.OnEnvironmentChanged(Env);
     }
@@ -749,11 +884,31 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    internal void RememberSelectedServer(string id)
+    {
+        var settings = SettingsService.Settings;
+        if (settings.LastSelectedServerId == id) return;
+        settings.LastSelectedServerId = id;
+        SaveSettingsSafe("Persisting the selected server failed");
+    }
+
+    private async Task LoadHeroVideoAsync()
+    {
+        var url = Environment.GetEnvironmentVariable("ICONIC_DAYZ_VIDEO") is { Length: > 0 } env ? env
+            : string.IsNullOrWhiteSpace(_config?.DayZHeroVideoUrl) ? LauncherConstants.DefaultDayZHeroVideoUrl : _config!.DayZHeroVideoUrl!.Trim();
+        var uri = await HeroVideoCache.EnsureAsync(url, SettingsService.AppDataDir, _cts.Token);
+        if (uri != null) DayZHeroVideoUri = uri;
+    }
+
     [RelayCommand]
     private void Navigate(string? section)
     {
         switch (section)
         {
+            case "PROFILE":
+                CurrentViewModel = IsWowActive ? Wow : Profile;
+                if (IsDayZActive) Profile.OnNavigatedTo();
+                break;
             case "MODS":
                 CurrentViewModel = Mods;
                 break;

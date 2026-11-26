@@ -65,7 +65,7 @@ public sealed class A2SQueryService : IA2SQueryService
         return ParseInfo(data, (int)stopwatch.ElapsedMilliseconds);
     }
 
-    private static ServerStatus ParseInfo(byte[] data, int pingMs)
+    public static ServerStatus ParseInfo(byte[] data, int pingMs)
     {
         var offset = 6;
         var name = ReadNullTerminated(data, ref offset);
@@ -78,6 +78,8 @@ public sealed class A2SQueryService : IA2SQueryService
         var maxPlayers = offset < data.Length ? data[offset] : (byte)0;
         var visibilityOffset = offset + 4;
         var passwordProtected = visibilityOffset < data.Length && data[visibilityOffset] == 1;
+        var versionOffset = visibilityOffset + 2;
+        var version = versionOffset < data.Length ? ReadNullTerminated(data, ref versionOffset) : null;
         return new ServerStatus
         {
             Online = true,
@@ -86,7 +88,8 @@ public sealed class A2SQueryService : IA2SQueryService
             Players = players,
             MaxPlayers = maxPlayers,
             PingMs = pingMs,
-            PasswordProtected = passwordProtected
+            PasswordProtected = passwordProtected,
+            Version = string.IsNullOrWhiteSpace(version) ? null : version
         };
     }
 

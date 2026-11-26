@@ -23,6 +23,8 @@ public sealed class LogDumpService
         sb.AppendLine($"profile name: {settings.ProfileName}");
         sb.AppendLine($"dayz path override: {settings.DayZPathOverride ?? "(none)"}");
         sb.AppendLine($"steam path override: {settings.SteamPathOverride ?? "(none)"}");
+        sb.AppendLine($"dayz exp path override: {settings.DayZExpPathOverride ?? "(none)"}");
+        sb.AppendLine($"auto update mods: {settings.AutoUpdateMods}");
         sb.AppendLine($"config url override: {settings.ConfigUrlOverride ?? "(none)"}");
         sb.AppendLine($"launch flags: noSplash={settings.LaunchNoSplash} noPause={settings.LaunchNoPause} window={settings.LaunchWindowed} doLogs={settings.LaunchDoLogs}");
         sb.AppendLine($"extra params: {settings.ExtraLaunchParams}");

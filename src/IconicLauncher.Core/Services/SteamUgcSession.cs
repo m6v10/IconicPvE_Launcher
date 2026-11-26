@@ -18,6 +18,15 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
     private static readonly TimeSpan DownloadWatchdog = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan DrainTimeout = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan DrainPollInterval = TimeSpan.FromSeconds(2);
+    private const int AcfSettleAttempts = 8;
+    private static readonly TimeSpan AcfSettleDelay = TimeSpan.FromSeconds(1);
+
+    private readonly IModIntegrityChecker? _integrity;
+
+    public SteamUgcSession(IModIntegrityChecker? integrity = null)
+    {
+        _integrity = integrity;
+    }
 
     public async Task<bool> EnsureModsReadyAsync(IList<ModVerificationResult> mods, SteamEnvironment env, IProgress<WorkshopProgress> progress, CancellationToken ct = default)
     {
@@ -29,11 +38,22 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
 
         foreach (var mod in mods)
         {
-            if ((mod.State == ModState.NotInstalled || mod.State == ModState.Outdated) && !ulong.TryParse(mod.Mod.WorkshopId, out _))
+            if ((mod.State is ModState.NotInstalled or ModState.Outdated or ModState.Damaged) && !ulong.TryParse(mod.Mod.WorkshopId, out _))
             {
                 mod.State = ModState.Failed;
                 mod.FailReason = "invalid workshop id";
             }
+        }
+        foreach (var mod in mods.Where(m => m.State == ModState.Damaged).ToList())
+        {
+            Log.Information("Reinstalling damaged mod {WorkshopId} ({Reason})", mod.Mod.WorkshopId, mod.IntegrityIssue);
+            if (!await ClearLocalCopyAsync(mod, env, ct).ConfigureAwait(false))
+            {
+                mod.State = ModState.Failed;
+                mod.FailReason = "could not remove the damaged files";
+                continue;
+            }
+            mod.State = ModState.NotInstalled;
         }
         var targets = mods.Where(m => m.State == ModState.NotInstalled || m.State == ModState.Outdated).ToList();
         if (targets.Count == 0)
@@ -79,7 +99,9 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
                 SteamAPI.Shutdown();
         }
 
-        FinalizeVerification(targets, env, progress);
+        await FinalizeVerificationAsync(targets, env, progress, ct).ConfigureAwait(false);
+        foreach (var mod in targets.Where(m => m.State == ModState.Ready))
+            _integrity?.Forget(mod.Mod.WorkshopId);
         var allReady = mods.All(m => m.State == ModState.Ready);
         Log.Information("UGC session finished, all ready: {AllReady}", allReady);
         return allReady;
@@ -248,12 +270,12 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
         Log.Warning("Steam client drain timed out after {Minutes} minutes", (int)DrainTimeout.TotalMinutes);
     }
 
-    private static void FinalizeVerification(List<ModVerificationResult> targets, SteamEnvironment env, IProgress<WorkshopProgress> progress)
+    private static async Task FinalizeVerificationAsync(List<ModVerificationResult> targets, SteamEnvironment env, IProgress<WorkshopProgress> progress, CancellationToken ct)
     {
         foreach (var mod in targets.Where(m => m.State != ModState.Failed))
             mod.State = ModState.Verifying;
         Report(progress, targets, "verifying");
-        var acf = WorkshopAcf.Load(env.AcfPath!);
+        var acf = await LoadSettledAcfAsync(env, targets.Where(m => m.State == ModState.Verifying).ToList(), ct).ConfigureAwait(false);
         foreach (var mod in targets.Where(m => m.State == ModState.Verifying))
         {
             var id = mod.Mod.WorkshopId;
@@ -293,6 +315,8 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
             mod.FailReason = "invalid workshop id";
             return false;
         }
+        if (mod.State == ModState.Damaged)
+            return await ForceRebuildAsync(mod, env, progress, ct).ConfigureAwait(false);
         ReportSingle(progress, mod, "updating");
 
         var removed = await RefreshRemoteDetailsAsync(mod, ct).ConfigureAwait(false);
@@ -353,15 +377,12 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
         }
         ReportSingle(progress, mod, "rebuilding");
 
-        var contentDir = mod.InstallPath ?? Path.Combine(env.WorkshopContentDir, mod.Mod.WorkshopId);
-        if (!await DeleteDirectoryWithRetriesAsync(contentDir, ct).ConfigureAwait(false))
+        if (!await ClearLocalCopyAsync(mod, env, ct).ConfigureAwait(false))
         {
             mod.State = ModState.Failed;
             mod.FailReason = "could not remove content directory";
             return false;
         }
-        var downloadsDir = Path.Combine(Path.GetDirectoryName(env.AcfPath)!, "downloads", LauncherConstants.DayZAppId, mod.Mod.WorkshopId);
-        await DeleteDirectoryWithRetriesAsync(downloadsDir, ct).ConfigureAwait(false);
 
         mod.State = ModState.NotInstalled;
         mod.InstallPath = null;
@@ -417,6 +438,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
 
         var contentDir = mod.InstallPath ?? Path.Combine(env.WorkshopContentDir, mod.Mod.WorkshopId);
         var deleted = await DeleteDirectoryWithRetriesAsync(contentDir, ct).ConfigureAwait(false);
+        _integrity?.Forget(mod.Mod.WorkshopId);
 
         mod.State = ModState.NotInstalled;
         mod.InstallPath = null;
@@ -474,7 +496,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
         return false;
     }
 
-    private static async Task<bool> DownloadAndVerifySingleAsync(ModVerificationResult mod, SteamEnvironment env, IProgress<WorkshopProgress> progress, string phase, CancellationToken ct)
+    private async Task<bool> DownloadAndVerifySingleAsync(ModVerificationResult mod, SteamEnvironment env, IProgress<WorkshopProgress> progress, string phase, CancellationToken ct)
     {
         var id = ulong.Parse(mod.Mod.WorkshopId);
         var pid = new PublishedFileId_t(id);
@@ -565,7 +587,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
             }
         }
 
-        var acf = WorkshopAcf.Load(env.AcfPath!);
+        var acf = await LoadSettledAcfAsync(env, new List<ModVerificationResult> { mod }, ct).ConfigureAwait(false);
         var installed = acf?.Installed.GetValueOrDefault(mod.Mod.WorkshopId);
         var dir = Path.Combine(env.WorkshopContentDir!, mod.Mod.WorkshopId);
         mod.LocalManifest = installed?.Manifest;
@@ -576,6 +598,7 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
             mod.InstallPath = dir;
             if (installed != null)
                 mod.LocalTimeUpdated = installed.TimeUpdated;
+            _integrity?.Forget(mod.Mod.WorkshopId);
             ReportSingle(progress, mod, phase);
             return true;
         }
@@ -588,6 +611,34 @@ public sealed class SteamUgcSession : IWorkshopUpdateService, IModOperationsServ
         Log.Warning("Verification failed for {WorkshopId}: {Reason}", id, mod.FailReason);
         ReportSingle(progress, mod, phase);
         return false;
+    }
+
+    private static async Task<WorkshopAcf?> LoadSettledAcfAsync(SteamEnvironment env, List<ModVerificationResult> mods, CancellationToken ct)
+    {
+        var acf = WorkshopAcf.Load(env.AcfPath!);
+        for (var attempt = 1; attempt <= AcfSettleAttempts; attempt++)
+        {
+            var pending = mods.Where(m => m.RemoteManifest != null && acf?.Installed.GetValueOrDefault(m.Mod.WorkshopId)?.Manifest != m.RemoteManifest).ToList();
+            if (pending.Count == 0)
+                break;
+            Log.Debug("Workshop ACF not settled yet for {Ids}, re-reading ({Attempt}/{Max})", string.Join(",", pending.Select(m => m.Mod.WorkshopId)), attempt, AcfSettleAttempts);
+            await Task.Delay(AcfSettleDelay, ct).ConfigureAwait(false);
+            acf = WorkshopAcf.Load(env.AcfPath!);
+        }
+        return acf;
+    }
+
+    private async Task<bool> ClearLocalCopyAsync(ModVerificationResult mod, SteamEnvironment env, CancellationToken ct)
+    {
+        var contentDir = mod.InstallPath ?? Path.Combine(env.WorkshopContentDir!, mod.Mod.WorkshopId);
+        if (!await DeleteDirectoryWithRetriesAsync(contentDir, ct).ConfigureAwait(false))
+            return false;
+        var downloadsDir = Path.Combine(Path.GetDirectoryName(env.AcfPath)!, "downloads", LauncherConstants.DayZAppId, mod.Mod.WorkshopId);
+        await DeleteDirectoryWithRetriesAsync(downloadsDir, ct).ConfigureAwait(false);
+        _integrity?.Forget(mod.Mod.WorkshopId);
+        mod.InstallPath = null;
+        mod.IntegrityIssue = null;
+        return true;
     }
 
     private static async Task<EResult> SubscribeSingleAsync(PublishedFileId_t pid, CancellationToken ct)

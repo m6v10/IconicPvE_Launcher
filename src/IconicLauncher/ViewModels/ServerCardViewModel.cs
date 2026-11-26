@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconicLauncher.Core.Models;
+using IconicLauncher.Core.Services;
 using Serilog;
 
 namespace IconicLauncher.ViewModels;
@@ -23,6 +25,7 @@ public sealed partial class ServerCardViewModel : ObservableObject
     private readonly MainViewModel _owner;
     private IReadOnlyList<ModVerificationResult> _verification = Array.Empty<ModVerificationResult>();
     private bool _hasPolled;
+    private bool _passwordStateKnown;
     private bool _verifying;
 
     public ServerEntry Server { get; }
@@ -38,7 +41,15 @@ public sealed partial class ServerCardViewModel : ObservableObject
         Server = server;
         _owner = owner;
         IsCustom = isCustom;
+        var saved = owner.LoadServerPassword(server.Id);
+        if (saved is { Length: > 0 })
+        {
+            serverPassword = saved;
+            hasSavedPassword = true;
+        }
+        serverVersion = owner.GetServerCache(server.Id)?.Version;
         UpdateRestartCountdown();
+        RefreshBranch();
     }
 
     [ObservableProperty]
@@ -94,10 +105,46 @@ public sealed partial class ServerCardViewModel : ObservableObject
     [ObservableProperty]
     private string serverPassword = "";
 
+    [ObservableProperty]
+    private bool hasSavedPassword;
+
+    [ObservableProperty]
+    private bool isExperimental;
+
+    [ObservableProperty]
+    private string? serverVersion;
+
+    [ObservableProperty]
+    private bool isSelected;
+
+    public string Region => ProfileViewModel.HubKeyFor(Server) is { } key ? key.Split('-')[0].ToUpperInvariant() : "";
+
+    public string ExperimentalToolTip => $"Joins with DayZ Experimental{(ServerVersion is { Length: > 0 } v ? " (server runs " + v + ")" : "")} - same Workshop mods, nothing downloads twice";
+
+    partial void OnServerVersionChanged(string? value)
+    {
+        OnPropertyChanged(nameof(ExperimentalToolTip));
+    }
+
+    public void RefreshBranch()
+    {
+        IsExperimental = GameBranch.UseExperimental(Server, _owner.SettingsService.Settings, _owner.Env, ServerVersion);
+    }
+
     [RelayCommand]
     private void TogglePasswordEntry()
     {
         PasswordEntryOpen = !PasswordEntryOpen;
+    }
+
+    [RelayCommand]
+    private void ForgetPassword()
+    {
+        ServerPassword = "";
+        HasSavedPassword = false;
+        PasswordEntryOpen = false;
+        _owner.SaveServerPassword(Server.Id, null);
+        StatusText = "Saved password removed";
     }
 
     [RelayCommand]
@@ -116,7 +163,9 @@ public sealed partial class ServerCardViewModel : ObservableObject
     private void ConfirmPassword()
     {
         PasswordEntryOpen = false;
-        StatusText = ServerPassword.Length > 0 ? "Password set - it will be used when joining" : null;
+        _owner.SaveServerPassword(Server.Id, ServerPassword);
+        HasSavedPassword = ServerPassword.Length > 0;
+        StatusText = HasSavedPassword ? "Password saved - it is used automatically when you join" : "Saved password removed";
     }
 
     public string PlayersText => Online ? $"{Players}/{MaxPlayers}" : "-/-";
@@ -237,11 +286,18 @@ public sealed partial class ServerCardViewModel : ObservableObject
             if (status.Online)
             {
                 PasswordProtected = status.PasswordProtected;
+                _passwordStateKnown = true;
                 if (!status.PasswordProtected)
                 {
                     PasswordEntryOpen = false;
                 }
+                if (status.Version is { Length: > 0 } version && version != ServerVersion)
+                {
+                    ServerVersion = version;
+                    _owner.RememberServerVersion(Server.Id, version);
+                }
             }
+            RefreshBranch();
         }
         catch (OperationCanceledException)
         {
@@ -275,6 +331,7 @@ public sealed partial class ServerCardViewModel : ObservableObject
             return;
         }
         _verifying = true;
+        var listNote = "";
         try
         {
             State = CardState.Checking;
@@ -293,14 +350,26 @@ public sealed partial class ServerCardViewModel : ObservableObject
                 if (IsLaunchState()) return;
                 if (queried is null)
                 {
-                    _verification = Array.Empty<ModVerificationResult>();
-                    OutdatedCount = 0;
-                    StatusText = "Mod list unavailable - the server did not answer the query";
-                    State = CardState.NoModList;
-                    OnPropertyChanged(nameof(ModCount));
-                    return;
+                    var known = _owner.GetKnownMods(Server);
+                    if (known is null)
+                    {
+                        _verification = Array.Empty<ModVerificationResult>();
+                        OutdatedCount = 0;
+                        StatusText = "Mod list unavailable - the server did not answer the query";
+                        State = CardState.NoModList;
+                        OnPropertyChanged(nameof(ModCount));
+                        return;
+                    }
+                    Server.Mods = known.Value.Mods.ToList();
+                    listNote = known.Value.Utc is { } utc
+                        ? " (mod list from " + utc.ToLocalTime().ToString("dd.MM. HH:mm", CultureInfo.InvariantCulture) + ")"
+                        : " (last known mod list)";
                 }
-                Server.Mods = queried.ToList();
+                else
+                {
+                    Server.Mods = queried.ToList();
+                    _owner.RememberServerMods(Server.Id, Server.Mods);
+                }
                 OnPropertyChanged(nameof(ModCount));
             }
             try
@@ -309,7 +378,7 @@ public sealed partial class ServerCardViewModel : ObservableObject
                 if (IsLaunchState()) return;
                 _verification = results;
                 OutdatedCount = results.Count(r => r.State != ModState.Ready);
-                StatusText = OutdatedCount > 0 ? $"{OutdatedCount} of {results.Count} mods need attention" : "All mods verified";
+                StatusText = (OutdatedCount > 0 ? $"{OutdatedCount} of {results.Count} mods need attention" : "All mods verified") + listNote;
                 State = RecomputeState();
             }
             catch (Exception ex)
@@ -346,6 +415,11 @@ public sealed partial class ServerCardViewModel : ObservableObject
             return false;
         }
         if (State is CardState.Downloading or CardState.Launching or CardState.Running) return false;
+        if (_owner.Mods.IsUpdatingAll)
+        {
+            StatusText = "Mods are already updating - wait until the MODS tab finishes";
+            return false;
+        }
         if (_verification.Count == 0)
         {
             await VerifyAsync();
@@ -439,8 +513,9 @@ public sealed partial class ServerCardViewModel : ObservableObject
         LaunchResult result;
         try
         {
-            var password = PasswordProtected && ServerPassword.Length > 0 ? ServerPassword : null;
-            result = _owner.Launcher.Launch(Server, _verification, env, _owner.SettingsService.Settings, password);
+            var password = ServerPassword.Length > 0 && (PasswordProtected || !_passwordStateKnown) ? ServerPassword : null;
+            RefreshBranch();
+            result = _owner.Launcher.Launch(Server, _verification, env, _owner.SettingsService.Settings, password, IsExperimental);
         }
         catch (Exception ex)
         {

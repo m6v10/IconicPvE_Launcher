@@ -25,6 +25,8 @@
     <Resource Include="Assets\dayz_logo.png" />
     <Resource Include="Assets\wow_logo.png" />
     <Resource Include="Assets\wow_hero.png" />
+    <Resource Include="Assets\dayz_hero.jpg" />
+    <Resource Include="Assets\Fonts\*.ttf" />
     <None Include="NativeLibs\steam_api64.dll" Link="steam_api64.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

@@ -34,14 +34,17 @@ public partial class App : Application
                 afterUpdatePath = e.Args[++i];
             }
         }
-        _mutex = new Mutex(true, "IconicLauncher_SingleInstance", out var createdNew);
+        var devDir = Environment.GetEnvironmentVariable("ICONIC_LAUNCHER_DEV_DIR");
+        _mutex = new Mutex(true, string.IsNullOrWhiteSpace(devDir) ? "IconicLauncher_SingleInstance" : "IconicLauncher_SingleInstance_Dev", out var createdNew);
         _ownsMutex = createdNew;
         if (!createdNew)
         {
             Shutdown();
             return;
         }
-        var appDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), LauncherConstants.AppDataFolderName);
+        var appDataDir = string.IsNullOrWhiteSpace(devDir)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), LauncherConstants.AppDataFolderName)
+            : devDir;
         var logDir = Path.Combine(appDataDir, "logs");
         try
         {
@@ -75,7 +78,7 @@ public partial class App : Application
         };
         try
         {
-            var settingsService = new SettingsService();
+            var settingsService = new SettingsService(string.IsNullOrWhiteSpace(devDir) ? null : devDir);
             LogLevelController.SetDebug(settingsService.Settings.DebugLogging);
             if (settingsService.Settings.DebugLogging)
             {
@@ -85,8 +88,9 @@ public partial class App : Application
             var configService = new RemoteConfigService(configUrl, settingsService.AppDataDir, ReadEmbeddedFallback);
             var steamLocator = new SteamLibraryLocator();
             var workshopWebApi = new WorkshopWebApi();
-            var verificationService = new ModVerificationService(workshopWebApi, new ModIntegrityChecker());
-            var ugcSession = new SteamUgcSession();
+            var integrityChecker = new ModIntegrityChecker(Path.Combine(settingsService.AppDataDir, "integrity-baseline.json"));
+            var verificationService = new ModVerificationService(workshopWebApi, integrityChecker);
+            var ugcSession = new SteamUgcSession(integrityChecker);
             _ugcSession = ugcSession;
             var gameLauncher = new GameLauncher();
             var a2sService = new A2SQueryService();

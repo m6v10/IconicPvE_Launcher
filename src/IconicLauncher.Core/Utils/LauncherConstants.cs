@@ -3,12 +3,17 @@ namespace IconicLauncher.Core.Utils;
 public static class LauncherConstants
 {
     public const string DayZAppId = "221100";
+    public const string DayZExpAppId = "1024020";
     public const string AppDataFolderName = "IconicLauncher";
     /// <summary>
     /// Served out of the WordPress uploads folder: FTP /public_html/wp-content/uploads/launcher
     /// maps to /wp-content/uploads/launcher on the site (public_html is the web root).
     /// </summary>
     public const string DefaultConfigUrl = "https://iconic-pve.com/wp-content/uploads/launcher/launcher-config.json";
+
+    public const string DefaultHubBaseUrl = "https://iconic-pve.com/wp-content/uploads/leaderboard/hub";
+
+    public const string DefaultDayZHeroVideoUrl = "https://iconic-pve.com/wp-content/uploads/launcher/media/dayz_hero_v1.mp4";
 
     public const string LogUploadUrl = "https://iconic-pve.com/wp-json/iconic/v1/logdump";
 

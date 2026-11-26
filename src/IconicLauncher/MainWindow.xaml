@@ -13,6 +13,9 @@
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
+            <views:ProfileView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModsViewModel}">
             <views:ModsView/>
         </DataTemplate>
@@ -69,6 +72,9 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="26,0,0,0">
                     <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="HOME"
                                  IsChecked="{Binding IsHomeChecked, Mode=OneWay}" Command="{Binding NavigateCommand}" CommandParameter="HOME"/>
+                    <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Content="PROFILE" Command="{Binding NavigateCommand}" CommandParameter="PROFILE"
+                                 IsChecked="{Binding IsProfileChecked, Mode=OneWay}"
+                                 Visibility="{Binding IsDayZActive, Converter={StaticResource BoolToVis}}"/>
                     <RadioButton Style="{StaticResource NavItemTop}" GroupName="Nav" Command="{Binding NavigateCommand}" CommandParameter="MODS"
                                  IsChecked="{Binding IsModsChecked, Mode=OneWay}"
                                  Visibility="{Binding IsDayZActive, Converter={StaticResource BoolToVis}}">
@@ -184,7 +190,70 @@
                 Visibility="{Binding StatusBanner, Converter={StaticResource NullToVis}}">
             <TextBlock Text="{Binding StatusBanner}" Foreground="{StaticResource StatusAmberBrush}" FontSize="12" TextWrapping="Wrap"/>
         </Border>
-        <ContentControl Content="{Binding CurrentViewModel}"/>
+        <Grid>
+            <Grid x:Name="DayZBackdrop" ClipToBounds="True" IsVisibleChanged="OnBackdropVisibleChanged"
+                  Visibility="{Binding ShowDayZBackdrop, Converter={StaticResource BoolToVis}}">
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <VisualBrush Visual="{Binding ElementName=HeroFrame}" Stretch="UniformToFill"/>
+                    </Rectangle.Fill>
+                    <Rectangle.Effect>
+                        <BlurEffect Radius="70" RenderingBias="Performance"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+                <Rectangle Fill="#660F1115"/>
+                <Viewbox Stretch="Uniform" Margin="28,84,344,142">
+                    <Viewbox.Style>
+                        <Style TargetType="Viewbox">
+                            <Setter Property="Opacity" Value="1"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsProfilePage}" Value="True">
+                                    <Setter Property="Opacity" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Viewbox.Style>
+                    <Viewbox.OpacityMask>
+                        <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                            <GradientStop Color="#FF000000" Offset="0"/>
+                            <GradientStop Color="#F2000000" Offset="0.42"/>
+                            <GradientStop Color="#8C000000" Offset="0.72"/>
+                            <GradientStop Color="#00000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Viewbox.OpacityMask>
+                    <Grid x:Name="HeroFrame" Width="1280" Height="574">
+                        <Image Source="/Assets/dayz_hero.jpg" Stretch="Fill"/>
+                        <MediaElement x:Name="DayZVideo" Source="{Binding DayZHeroVideoUri}" Stretch="Fill"
+                                      LoadedBehavior="Manual" UnloadedBehavior="Manual" IsMuted="True"
+                                      Loaded="OnDayZVideoLoaded" MediaOpened="OnDayZVideoLoaded"
+                                      MediaEnded="OnDayZVideoEnded" MediaFailed="OnDayZVideoFailed"
+                                      Visibility="{Binding DayZHeroVideoUri, Converter={StaticResource NullToVis}}"/>
+                    </Grid>
+                </Viewbox>
+                <Grid Visibility="{Binding IsProfilePage, Converter={StaticResource InvBoolToVis}}">
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#800F1115" Offset="0"/>
+                                <GradientStop Color="#000F1115" Offset="0.2"/>
+                                <GradientStop Color="#000F1115" Offset="0.62"/>
+                                <GradientStop Color="#E60F1115" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#000F1115" Offset="0.6"/>
+                                <GradientStop Color="#B30F1115" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Grid>
+                <Rectangle Fill="#C70D0F13" Visibility="{Binding IsProfilePage, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+            <ContentControl Content="{Binding CurrentViewModel}"/>
+        </Grid>
     </DockPanel>
     <Border Background="#C0070809" Visibility="{Binding Dialog, Converter={StaticResource NullToVis}}">
         <Border.Style>

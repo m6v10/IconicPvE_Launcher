@@ -33,7 +33,7 @@ public interface IWorkshopUpdateService
 
 public interface IGameLauncher
 {
-    LaunchResult Launch(ServerEntry server, IReadOnlyList<ModVerificationResult> mods, SteamEnvironment env, LauncherSettings settings, string? password = null);
+    LaunchResult Launch(ServerEntry server, IReadOnlyList<ModVerificationResult> mods, SteamEnvironment env, LauncherSettings settings, string? password = null, bool experimental = false);
 }
 
 public interface IA2SQueryService
@@ -71,7 +71,8 @@ public interface IModOperationsService
 
 public interface IModIntegrityChecker
 {
-    string? Check(string installPath, long baselineUnixTime);
+    string? Check(string workshopId, string installPath, string? manifest);
+    void Forget(string workshopId);
 }
 
 public interface IWowPatchService

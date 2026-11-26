@@ -18,6 +18,7 @@ public sealed class LauncherSettings
     public string ProfileName { get; set; } = "Survivor";
     public string ExtraLaunchParams { get; set; } = "";
     public string? DayZPathOverride { get; set; }
+    public string? DayZExpPathOverride { get; set; }
     public string? SteamPathOverride { get; set; }
     public string? ConfigUrlOverride { get; set; }
     public bool AutoConnect { get; set; } = true;
@@ -40,6 +41,17 @@ public sealed class LauncherSettings
     public string DefaultGame { get; set; } = "last";
     public string LastGame { get; set; } = "DAYZ";
     public string? WowClientPath { get; set; }
+    public bool AutoUpdateMods { get; set; } = true;
+    public Dictionary<string, bool> ServerExperimental { get; set; } = new();
+    public Dictionary<string, string> ServerPasswords { get; set; } = new();
+    public Dictionary<string, ServerCacheEntry> ServerCache { get; set; } = new();
+}
+
+public sealed class ServerCacheEntry
+{
+    public List<ModEntry> Mods { get; set; } = new();
+    public DateTime? ModsUtc { get; set; }
+    public string? Version { get; set; }
 }
 
 public sealed class AdminSettings
@@ -61,6 +73,7 @@ public sealed class ServerStatus
     public int MaxPlayers { get; init; }
     public int PingMs { get; init; }
     public bool PasswordProtected { get; init; }
+    public string? Version { get; init; }
 }
 
 public sealed class SteamEnvironment
@@ -68,6 +81,9 @@ public sealed class SteamEnvironment
     public string? SteamRoot { get; init; }
     public string? LibraryRoot { get; init; }
     public string? DayZDir { get; init; }
+    public string? DayZExpDir { get; init; }
+    public string? DayZVersion { get; init; }
+    public string? DayZExpVersion { get; init; }
     public string? WorkshopContentDir { get; init; }
     public string? AcfPath { get; init; }
     public bool DayZFound => DayZDir != null && WorkshopContentDir != null;

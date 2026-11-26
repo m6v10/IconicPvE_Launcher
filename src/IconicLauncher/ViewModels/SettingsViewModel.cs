@@ -31,6 +31,18 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string steamPathOverride = "";
 
     [ObservableProperty]
+    private string dayZExpPathOverride = "";
+
+    [ObservableProperty]
+    private string autoDetectedDayZExpPath = "Detecting...";
+
+    [ObservableProperty]
+    private string? gameVersionsText;
+
+    [ObservableProperty]
+    private bool autoUpdateMods;
+
+    [ObservableProperty]
     private bool autoConnect;
 
     [ObservableProperty]
@@ -83,6 +95,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         ExtraLaunchParams = s.ExtraLaunchParams;
         DayZPathOverride = s.DayZPathOverride ?? "";
         SteamPathOverride = s.SteamPathOverride ?? "";
+        DayZExpPathOverride = s.DayZExpPathOverride ?? "";
+        AutoUpdateMods = s.AutoUpdateMods;
         AutoConnect = s.AutoConnect;
         CloseOnLaunch = s.CloseOnLaunch;
         DiscordRpcEnabled = s.DiscordRpcEnabled;
@@ -165,6 +179,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         var env = _owner.Env;
         AutoDetectedDayZPath = env?.DayZDir ?? "Not detected - enter the DayZ folder path";
         AutoDetectedSteamPath = env?.SteamRoot ?? "Not detected - enter the Steam folder path";
+        AutoDetectedDayZExpPath = env?.DayZExpDir ?? "Not installed - optional, only needed for experimental servers";
+        GameVersionsText = env is null
+            ? null
+            : $"Stable {env.DayZVersion ?? "not found"}  |  Experimental {env.DayZExpVersion ?? "not found"}";
     }
 
     [RelayCommand]
@@ -175,6 +193,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.ExtraLaunchParams = ExtraLaunchParams.Trim();
         s.DayZPathOverride = string.IsNullOrWhiteSpace(DayZPathOverride) ? null : DayZPathOverride.Trim();
         s.SteamPathOverride = string.IsNullOrWhiteSpace(SteamPathOverride) ? null : SteamPathOverride.Trim();
+        s.DayZExpPathOverride = string.IsNullOrWhiteSpace(DayZExpPathOverride) ? null : DayZExpPathOverride.Trim();
+        s.AutoUpdateMods = AutoUpdateMods;
         s.AutoConnect = AutoConnect;
         s.CloseOnLaunch = CloseOnLaunch;
         s.DiscordRpcEnabled = DiscordRpcEnabled;

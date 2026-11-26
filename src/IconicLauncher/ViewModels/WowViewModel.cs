@@ -417,6 +417,18 @@ public sealed partial class WowViewModel : ObservableObject
         _applyCts = new CancellationTokenSource();
         try
         {
+            if (Core.Utils.WowProcess.IsRunning())
+            {
+                ApplyDetailText = "Closing World of Warcraft so the update can be applied...";
+                Log.Information("WoW is running - closing it before patching");
+                var closed = await Task.Run(Core.Utils.WowProcess.ForceClose);
+                if (!closed)
+                {
+                    ErrorText = "Could not close World of Warcraft - please close the game and press PLAY again";
+                    ApplyDetailText = null;
+                    return false;
+                }
+            }
             var progress = new Progress<WowApplyProgress>(p =>
             {
                 ApplyPercent = p.BytesTotal > 0 ? p.BytesDone * 100.0 / p.BytesTotal : 100;

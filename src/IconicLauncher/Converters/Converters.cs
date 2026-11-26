@@ -107,3 +107,16 @@ public sealed class StringEqualsConverter : IValueConverter
         return Binding.DoNothing;
     }
 }
+
+public sealed class InverseBoolConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return value is not true;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return value is not true;
+    }
+}

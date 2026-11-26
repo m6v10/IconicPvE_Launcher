@@ -21,6 +21,7 @@
             <StackPanel Visibility="{Binding DataContext.IsDayZActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}">
             <TextBlock Text="DAYZ" Style="{StaticResource SectionLabel}" Margin="0,26,0,6" Foreground="{DynamicResource AccentBrush}"/>
             <CheckBox Content="Discord Rich Presence (shows your DayZ server in Discord)" Margin="0,6,0,0" IsChecked="{Binding DiscordRpcEnabled}"/>
+            <CheckBox Content="Update outdated mods automatically in the background (while DayZ is closed)" Margin="0,10,0,0" IsChecked="{Binding AutoUpdateMods}"/>
             <TextBlock Text="PROFILE NAME" Style="{StaticResource SectionLabel}" Margin="0,14,0,6"/>
             <TextBox Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}">
                 <TextBox.Style>
@@ -96,6 +97,17 @@
                            Foreground="{StaticResource StatusGrayBrush}" TextTrimming="CharacterEllipsis"
                            Visibility="{Binding DayZPathOverride, Converter={StaticResource EmptyToVis}}"/>
             </Grid>
+            <TextBlock Text="DAYZ EXPERIMENTAL PATH OVERRIDE" Style="{StaticResource SectionLabel}" Margin="0,18,0,6"/>
+            <Grid>
+                <TextBox Text="{Binding DayZExpPathOverride, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding AutoDetectedDayZExpPath}" Margin="10,0,10,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                           Foreground="{StaticResource StatusGrayBrush}" TextTrimming="CharacterEllipsis"
+                           Visibility="{Binding DayZExpPathOverride, Converter={StaticResource EmptyToVis}}"/>
+            </Grid>
+            <TextBlock Text="Servers running the experimental version are joined with DayZ Exp automatically. Both games use the same Workshop mods, so nothing downloads twice. Force it per server in EDIT SERVER LIST."
+                       FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{StaticResource StatusGrayBrush}"/>
+            <TextBlock Text="{Binding GameVersionsText}" FontSize="12" Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}"
+                       Visibility="{Binding GameVersionsText, Converter={StaticResource NullToVis}}"/>
             <TextBlock Text="STEAM PATH OVERRIDE" Style="{StaticResource SectionLabel}" Margin="0,18,0,6"/>
             <Grid>
                 <TextBox Text="{Binding SteamPathOverride, UpdateSourceTrigger=PropertyChanged}"/>

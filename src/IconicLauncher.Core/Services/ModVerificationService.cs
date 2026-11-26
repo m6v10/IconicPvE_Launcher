@@ -85,8 +85,7 @@ public sealed class ModVerificationService : IModVerificationService
             }
             r.State = ModState.Ready;
             r.InstallPath = contentDir;
-            var baseline = acfDetails != null && acfDetails.TimeTouched > 0 ? acfDetails.TimeTouched : installed.TimeUpdated;
-            var issue = _integrity.Check(contentDir!, baseline);
+            var issue = _integrity.Check(id, contentDir!, installed.Manifest);
             if (issue != null)
             {
                 r.State = ModState.Damaged;

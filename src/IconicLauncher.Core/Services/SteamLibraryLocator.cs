@@ -13,7 +13,9 @@ public sealed class SteamLibraryLocator : ISteamLocator
     {
         var steamRoot = ResolveSteamRoot(settings);
         string? libraryRoot = null;
+        string? expLibraryRoot = null;
         string? dayzDir = null;
+        string? dayzExpDir = null;
         string? workshopContentDir = null;
         string? acfPath = null;
 
@@ -24,7 +26,9 @@ public sealed class SteamLibraryLocator : ISteamLocator
             {
                 try
                 {
-                    libraryRoot = FindLibraryPathForApp(File.ReadAllText(vdfPath), LauncherConstants.DayZAppId);
+                    var vdf = File.ReadAllText(vdfPath);
+                    libraryRoot = FindLibraryPathForApp(vdf, LauncherConstants.DayZAppId);
+                    expLibraryRoot = FindLibraryPathForApp(vdf, LauncherConstants.DayZExpAppId);
                 }
                 catch (Exception ex)
                 {
@@ -54,6 +58,13 @@ public sealed class SteamLibraryLocator : ISteamLocator
             }
         }
 
+        if (expLibraryRoot != null)
+        {
+            var candidate = Path.Combine(expLibraryRoot, "steamapps", "common", ReadInstallDir(expLibraryRoot, LauncherConstants.DayZExpAppId) ?? "DayZ Exp");
+            if (Directory.Exists(candidate))
+                dayzExpDir = candidate;
+        }
+
         if (!string.IsNullOrWhiteSpace(settings.DayZPathOverride))
         {
             if (Directory.Exists(settings.DayZPathOverride))
@@ -61,13 +72,26 @@ public sealed class SteamLibraryLocator : ISteamLocator
             else
                 Log.Warning("DayZ path override does not exist: {Path}", settings.DayZPathOverride);
         }
+        if (!string.IsNullOrWhiteSpace(settings.DayZExpPathOverride))
+        {
+            if (Directory.Exists(settings.DayZExpPathOverride))
+                dayzExpDir = Path.GetFullPath(settings.DayZExpPathOverride);
+            else
+                Log.Warning("DayZ Experimental path override does not exist: {Path}", settings.DayZExpPathOverride);
+        }
 
-        Log.Information("Steam environment: root={SteamRoot} library={LibraryRoot} dayz={DayZDir}", steamRoot, libraryRoot, dayzDir);
+        var dayzVersion = GameVersion.ReadMajorMinor(dayzDir);
+        var dayzExpVersion = GameVersion.ReadMajorMinor(dayzExpDir);
+        Log.Information("Steam environment: root={SteamRoot} library={LibraryRoot} dayz={DayZDir} ({DayZVersion}) exp={DayZExpDir} ({DayZExpVersion})",
+            steamRoot, libraryRoot, dayzDir, dayzVersion, dayzExpDir, dayzExpVersion);
         return new SteamEnvironment
         {
             SteamRoot = steamRoot,
             LibraryRoot = libraryRoot,
             DayZDir = dayzDir,
+            DayZExpDir = dayzExpDir,
+            DayZVersion = dayzVersion,
+            DayZExpVersion = dayzExpVersion,
             WorkshopContentDir = workshopContentDir,
             AcfPath = acfPath
         };
@@ -101,6 +125,27 @@ public sealed class SteamLibraryLocator : ISteamLocator
             Log.Warning(ex, "Failed to parse libraryfolders.vdf content");
             return null;
         }
+    }
+
+    private static string? ReadInstallDir(string libraryRoot, string appId)
+    {
+        var manifest = Path.Combine(libraryRoot, "steamapps", "appmanifest_" + appId + ".acf");
+        try
+        {
+            if (!File.Exists(manifest))
+                return null;
+            var root = VdfConvert.Deserialize(File.ReadAllText(manifest));
+            if (root.Value is VObject state && state.TryGetValue("installdir", out var dir))
+            {
+                var value = dir.ToString();
+                return string.IsNullOrWhiteSpace(value) ? null : value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to read {Manifest}", manifest);
+        }
+        return null;
     }
 
     private static string? ResolveSteamRoot(LauncherSettings settings)

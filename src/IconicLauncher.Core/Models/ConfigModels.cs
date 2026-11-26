@@ -10,6 +10,8 @@ public sealed class LauncherConfig
     public List<ServerEntry> Servers { get; set; } = new();
     public List<NewsItem> News { get; set; } = new();
     public WowConfig? Wow { get; set; }
+    public string? DayZHeroVideoUrl { get; set; }
+    public string? HubBaseUrl { get; set; }
 }
 
 public sealed class LauncherInfo
@@ -35,9 +37,11 @@ public sealed class ServerEntry
     public int QueryPort { get; set; }
     public bool ModsFromQuery { get; set; }
     public bool Optional { get; set; }
+    public bool Experimental { get; set; }
     public int RestartIntervalHours { get; set; }
     public int RestartAnchorHour { get; set; } = 1;
     public string RestartTimeZone { get; set; } = "Europe/Zurich";
+    public string? HubKey { get; set; }
     public List<ModEntry> Mods { get; set; } = new();
 }
 

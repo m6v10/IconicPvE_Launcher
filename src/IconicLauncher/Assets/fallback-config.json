@@ -3,7 +3,7 @@
     "generatedUtc":  "2026-08-01T06:21:22Z",
     "websiteUrl":  "https://iconic-pve.com",
     "launcher":  {
-                     "latestVersion":  "1.1.0",
+                     "latestVersion":  "1.2.1",
                      "downloadUrl":  "",
                      "sha256":  "",
                      "changelog":  ""
@@ -857,10 +857,10 @@
     "wow":  {
                 "name":  "Iconic WoW - Wrath of the Lich King",
                 "clientVersion":  "3.3.5a",
-                "ip":  "178.82.229.148",
+                "ip":  "37.156.35.84",
                 "authPort":  3724,
                 "worldPort":  8085,
-                "realmlist":  "set realmlist 178.82.229.148",
+                "realmlist":  "set realmlist 37.156.35.84",
                 "manifestUrl":  "https://cdn.iconic-pve.com/wow/manifest.json",
                 "filesBaseUrl":  "https://cdn.iconic-pve.com/wow/files",
                 "statusUrl":  null,

@@ -102,6 +102,19 @@ public sealed partial class ServerListRowViewModel : ObservableObject
             ? "mods read from the server"
             : $"{entry.Server.Mods.Count} mods";
         isShown = entry.IsVisible;
+        isExperimental = owner.IsServerExperimental(entry.Server);
+    }
+
+    [ObservableProperty]
+    private bool isExperimental;
+
+    partial void OnIsExperimentalChanged(bool value)
+    {
+        if (_updating)
+        {
+            return;
+        }
+        _owner.SetServerExperimental(Id, value);
     }
 
     [ObservableProperty]

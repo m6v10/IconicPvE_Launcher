@@ -62,3 +62,10 @@ code changes need the full release cycle above.
   independent URL and does not have to point at your domain.
 - Some hosts' malware scanners quarantine uploaded `.exe` files. If the file
   disappears or 403s shortly after upload, that is the cause.
+
+## Iconic Studio shares this folder
+
+`C:\DayZ\_Tools\studio_exe\make_exe.py` leaves `dist\upload\` with `IconicStudio-<v>.exe`,
+`IconicStudio.exe` and `studio-config.json`. Upload them into the same launcher folder, the
+json last - every open studio checks it at start and every 30 minutes. Details in the vault
+note "Model Studio" (self-updating exe).
